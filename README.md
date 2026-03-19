@@ -284,7 +284,6 @@ pkill -f node
 |Colors|`frontend/src/App.css`|Edit hex color values|
 |App title|`frontend/index.html` + `frontend/src/App.jsx`|`<title>` and `<h1>` tags|
 
----
 
 ## 📄 License
 
