@@ -38,3 +38,4 @@ spec:
       - name: mongo-volume
         persistentVolumeClaim:
           claimName: mongodb-volume-claim
+          
