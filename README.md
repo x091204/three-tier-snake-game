@@ -1,34 +1,41 @@
 # 🐍 Three-Tier Snake Game
 
-A fully functional Snake Game built as a **three-tier application** — designed from the ground up for Kubernetes deployment.
+A fully functional Snake Game built as a production-ready three-tier application, containerized with Docker, and deployed on Kubernetes.
 
 ---
 
-## 🏗️ Architecture
+## 📐 Architecture
 
 ```
-┌─────────────────┐     REST API      ┌─────────────────┐     Mongoose      ┌─────────────────┐
-│                 │ ────────────────▶ │                 │ ────────────────▶ │                 │
-│   React.js      │                   │   Node.js       │                   │   MongoDB       │
-│   Frontend      │ ◀──────────────── │   Backend       │ ◀──────────────── │   Database      │
-│   Port 3000     │                   │   Port 5000     │                   │   Port 27017    │
-│                 │                   │                 │                   │                 │
-└─────────────────┘                   └─────────────────┘                   └─────────────────┘
-     Tier 1                                Tier 2                                Tier 3
+                        ┌─────────────────────────────────────┐
+                        │         Kubernetes Cluster           │
+                        │         Namespace: three-tier-dev    │
+                        │                                      │
+  Browser ──► Ingress ──►  frontend-svc  ──►  frontend pod    │
+              (80 / api)                                       │
+                        │  backend-svc   ──►  backend pod(x2) │
+                        │                        │             │
+                        │  mongodb-svc   ──►  mongodb pod      │
+                        │                        │             │
+                        │                     PVC (1Gi)        │
+                        └─────────────────────────────────────┘
 ```
 
-Each tier runs as its own independent service — exactly how Kubernetes expects it.
+| Tier | Technology | Image | Replicas |
+|------|-----------|-------|----------|
+| Frontend | React + Vite + Nginx | `akifmhd/frontend:1.1` | 1 |
+| Backend | Node.js + Express | `akifmhd/backend:1.0` | 2 |
+| Database | MongoDB 7.0 | `mongo:7.0` | 1 |
 
 ---
 
-## 🎮 Features
+## 🎮 What the App Does
 
-- Snake game on a 20x20 grid controlled with arrow keys
+- Snake game on a 20×20 grid controlled with arrow keys
 - Score increases by 10 points per food eaten
-- Score is automatically saved to MongoDB after every game
-- Live scoreboard showing top 10 highest scores
-- Scoreboard refreshes automatically after each game
-- `/health` endpoint on backend for Kubernetes liveness probe
+- Score is automatically saved to MongoDB when the game ends
+- Scoreboard on the left shows the top 10 highest scores
+- Scoreboard refreshes automatically after every game
 
 ---
 
@@ -36,254 +43,314 @@ Each tier runs as its own independent service — exactly how Kubernetes expects
 
 ```
 three-tier-snake-game/
-├── backend/
+│
+├── backend/                        # Node.js + Express API
 │   ├── src/
-│   │   ├── config/
-│   │   │   └── db.js              # MongoDB connection
-│   │   ├── models/
-│   │   │   └── Score.js           # Mongoose schema
-│   │   ├── routes/
-│   │   │   └── scores.js          # POST and GET endpoints
-│   │   └── server.js              # Express entry point
-│   ├── .env                       # Local env vars (never commit)
-│   ├── .dockerignore
+│   │   ├── config/db.js            # MongoDB connection
+│   │   ├── models/Score.js         # Mongoose schema
+│   │   ├── routes/scores.js        # POST and GET endpoints
+│   │   └── server.js               # Express entry point
 │   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── .env                        # Local dev only — never commit
 │   └── package.json
 │
-├── frontend/
+├── frontend/                       # React + Vite
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Game.jsx           # Game grid renderer
-│   │   │   └── Scoreboard.jsx     # Top 10 scores table
+│   │   │   ├── Game.jsx            # Game grid renderer
+│   │   │   └── Scoreboard.jsx      # Top 10 scores table
 │   │   ├── hooks/
-│   │   │   └── useGame.js         # All game logic
-│   │   ├── App.jsx                # Root component
-│   │   ├── App.css                # All styles
-│   │   ├── api.js                 # All HTTP calls
-│   │   └── main.jsx               # React entry point
+│   │   │   └── useGame.js          # All game logic
+│   │   ├── App.jsx                 # Root component
+│   │   ├── App.css                 # All styling
+│   │   ├── api.js                  # All HTTP calls
+│   │   └── main.jsx                # React entry point
 │   ├── index.html
 │   ├── vite.config.js
-│   ├── .env.development           # API URL for local dev
-│   ├── .env.production            # API URL for Kubernetes
-│   ├── .dockerignore
+│   ├── .env.development            # API URL for local dev
+│   ├── .env.production             # API URL for production
 │   ├── Dockerfile
+│   ├── .dockerignore
 │   └── package.json
 │
-└── .gitignore
+├── k8s-manifest/                   # Kubernetes manifests
+│   ├── namespace.yml
+│   ├── ingress.yml
+│   ├── frontend/
+│   │   ├── frontend-dep.yml
+│   │   └── frontend-svc.yml
+│   ├── backend/
+│   │   ├── backend-dep.yml
+│   │   ├── backend-svc.yml
+│   │   └── backend-configmap.yml
+│   └── database/
+│       ├── mongodb-dep.yml
+│       ├── mongo-svc.yml
+│       ├── mongo-secret.yml
+│       └── pvc.yml
+│
+├── docker-compose.yml              # Local multi-container dev
+└── README.md
 ```
 
 ---
 
 ## ⚙️ Tech Stack
 
-|Tier|Technology|Port|
-|---|---|---|
-|Frontend|React.js + Vite|5173 (dev) / 80 (prod)|
-|Backend|Node.js + Express|5000|
-|Database|MongoDB|27017|
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, Vite, Axios |
+| Backend | Node.js, Express, Mongoose, dotenv |
+| Database | MongoDB 7.0 |
+| Container | Docker |
+| Orchestration | Kubernetes |
+| Ingress | Kubernetes Ingress (snake-game.com) |
+| Persistence | PersistentVolumeClaim (1Gi) |
 
 ---
 
 ## 🚀 Running Locally
 
-### Prerequisites
+### Option 1 — Manual (two terminals)
 
-- Node.js v20+
-- MongoDB v7+
-
-### 1. Install and start MongoDB
+**Prerequisites:** Node.js v20+, MongoDB running locally
 
 ```bash
-# Fedora / RHEL
-sudo tee /etc/yum.repos.d/mongodb-org-7.0.repo << 'EOF'
-[mongodb-org-7.0]
-name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/7.0/x86_64/
-gpgcheck=1
-enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
-EOF
-
-sudo dnf install -y mongodb-org
-sudo systemctl start mongod
-sudo systemctl enable mongod
-```
-
-### 2. Start the backend
-
-```bash
+# Terminal 1 — backend
 cd backend
 npm install
 npm run dev
-```
+# → Backend running on port 5000
+# → MongoDB connected
 
-Expected output:
-
-```
-Backend running on port 5000
-MongoDB connected
-```
-
-### 3. Start the frontend
-
-Open a new terminal tab, then:
-
-```bash
+# Terminal 2 — frontend
 cd frontend
 npm install
 npm run dev
+# → http://localhost:5173
 ```
 
-Expected output:
+**Environment files needed:**
 
+`backend/.env`
 ```
-VITE ready in 178ms
-Local: http://localhost:5173/
-```
-
-### 4. Open in browser
-
-```
-http://localhost:5173
-```
-
-If you are on a VM and accessing from a host machine:
-
-```bash
-# Open firewall ports on the VM
-sudo firewall-cmd --permanent --add-port=5173/tcp
-sudo firewall-cmd --permanent --add-port=5000/tcp
-sudo firewall-cmd --reload
-```
-
-Then update `frontend/.env.development`:
-
-```
-VITE_API_URL=http://YOUR_VM_IP:5000
-```
-
----
-
-## 🌍 Environment Variables
-
-### Backend — `backend/.env`
-
-```env
 MONGO_URI=mongodb://localhost:27017/snakegame
 PORT=5000
 ```
 
-### Frontend — `frontend/.env.development`
-
-```env
+`frontend/.env.development`
+```
 VITE_API_URL=http://localhost:5000
 ```
 
-### Frontend — `frontend/.env.production`
+> If accessing from a VM, replace `localhost` with your VM's IP address and open the firewall ports:
+> ```bash
+> sudo firewall-cmd --permanent --add-port=5173/tcp
+> sudo firewall-cmd --permanent --add-port=5000/tcp
+> sudo firewall-cmd --reload
+> ```
 
-```env
-VITE_API_URL=http://YOUR_BACKEND_SERVICE_URL
+---
+
+### Option 2 — Docker Compose
+
+```bash
+docker compose up
 ```
 
-> In Kubernetes, `.env` files are replaced by **ConfigMaps** and **Secrets**. The code reads from `process.env.*` and `import.meta.env.*` — it does not care where the values come from. No code changes needed.
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:8080 |
+| Backend | http://localhost:5000 |
+| MongoDB | localhost:27017 |
+
+> Make sure `backend/.env` exists before running compose.
+
+---
+
+## ☸️ Kubernetes Deployment
+
+### Prerequisites
+
+- A running Kubernetes cluster
+- `kubectl` configured and connected to the cluster
+- Docker images built and pushed to a registry
+- An Ingress controller installed on the cluster
+
+---
+
+### Step 1 — Build and push Docker images
+
+```bash
+# Backend
+docker build -t your-username/backend:1.0 ./backend
+docker push your-username/backend:1.0
+
+# Frontend
+docker build -t your-username/frontend:1.1 ./frontend
+docker push your-username/frontend:1.1
+```
+
+> Update the image names in `k8s-manifest/backend/backend-dep.yml` and `k8s-manifest/frontend/frontend-dep.yml` to match your registry.
+
+---
+
+### Step 2 — Create the namespace
+
+```bash
+kubectl apply -f k8s-manifest/namespace.yml
+```
+
+---
+
+### Step 3 — Create the MongoDB secret
+
+```bash
+kubectl apply -f k8s-manifest/database/mongo-secret.yml
+```
+
+> The secret stores MongoDB credentials as base64-encoded values. Update them before applying if needed.
+
+---
+
+### Step 4 — Apply all manifests
+
+```bash
+# Database
+kubectl apply -f k8s-manifest/database/
+
+# Backend
+kubectl apply -f k8s-manifest/backend/
+
+# Frontend
+kubectl apply -f k8s-manifest/frontend/
+
+# Ingress
+kubectl apply -f k8s-manifest/ingress.yml
+```
+
+---
+
+### Step 5 — Verify everything is running
+
+```bash
+kubectl get all -n three-tier-dev
+```
+
+Expected output:
+```
+NAME                                       READY   STATUS    RESTARTS
+pod/backend-dep-xxxxx                      1/1     Running   0
+pod/backend-dep-xxxxx                      1/1     Running   0
+pod/frontend-deployment-xxxxx              1/1     Running   0
+pod/mongodb-deployment-xxxxx               1/1     Running   0
+
+NAME                   TYPE        CLUSTER-IP    PORT(S)
+service/backend-svc    ClusterIP   10.x.x.x      5000/TCP
+service/frontend-svc   ClusterIP   10.x.x.x      80/TCP
+service/mongodb-svc    ClusterIP   10.x.x.x      27017/TCP
+```
+
+---
+
+### Step 6 — Access the app
+
+Add this to your `/etc/hosts` file (or configure DNS):
+
+```
+YOUR_CLUSTER_IP   snake-game.com
+```
+
+Then open your browser:
+
+```
+http://snake-game.com
+```
 
 ---
 
 ## 📡 API Reference
 
-|Method|Endpoint|Body|Description|
-|---|---|---|---|
-|GET|`/health`|none|Kubernetes liveness probe|
-|POST|`/api/scores`|`{ score: Number }`|Save a new score|
-|GET|`/api/scores`|none|Get top 10 scores|
+| Method | Endpoint | Body | Description |
+|--------|----------|------|-------------|
+| GET | `/health` | — | Kubernetes liveness probe |
+| POST | `/api/scores` | `{ score: Number }` | Save a score after game over |
+| GET | `/api/scores` | — | Get top 10 scores |
 
 ---
 
-## 🗄️ Database Schema
+## 🗄️ Database
 
-Collection: `scores`
+- **Database name:** `snakegame`
+- **Collection:** `scores`
+- **Auth source:** `admin`
+- **Credentials:** injected via Kubernetes Secret (`mongo-sec`)
 
-|Field|Type|Description|
-|---|---|---|
-|`_id`|ObjectId|Auto-generated primary key|
-|`score`|Number|Player's final score|
-|`createdAt`|Date|Auto-added by Mongoose|
-|`updatedAt`|Date|Auto-added by Mongoose|
+| Field | Type | Description |
+|-------|------|-------------|
+| `_id` | ObjectId | Auto-generated primary key |
+| `score` | Number | Player's final score |
+| `createdAt` | Date | Auto-added by Mongoose |
+| `updatedAt` | Date | Auto-added by Mongoose |
 
 ---
 
-## 🐳 Docker
+## 🔧 Kubernetes Resources Summary
 
-No Dockerfile needed for MongoDB — use the official image directly.
+| Resource | Name | Purpose |
+|----------|------|---------|
+| Namespace | `three-tier-dev` | Isolates all app resources |
+| Deployment | `frontend-deployment` | Runs the React/Nginx frontend (1 replica) |
+| Deployment | `backend-dep` | Runs the Node.js API (2 replicas) |
+| Deployment | `mongodb-deployment` | Runs MongoDB (1 replica) |
+| Service | `frontend-svc` | Internal ClusterIP — frontend |
+| Service | `backend-svc` | Internal ClusterIP — backend |
+| Service | `mongodb-svc` | Internal ClusterIP — MongoDB |
+| ConfigMap | `backend-config` | Stores `MONGO_URI` and `PORT` |
+| Secret | `mongo-sec` | Stores MongoDB root credentials |
+| PVC | `mongodb-volume-claim` | Persistent storage (1Gi) for MongoDB data |
+| Ingress | `ingress` | Routes `/` → frontend, `/api` → backend |
 
-### Build images
+---
+
+## 🛑 Useful Commands
 
 ```bash
-# Backend
-docker build -t your-username/snake-backend:v1 ./backend
+# Check pod status
+kubectl get pods -n three-tier-dev
 
-# Frontend
-docker build -t your-username/snake-frontend:v1 ./frontend
-```
+# Stream pod logs
+kubectl logs -f deployment/backend-dep -n three-tier-dev
+kubectl logs -f deployment/frontend-deployment -n three-tier-dev
+kubectl logs -f deployment/mongodb-deployment -n three-tier-dev
 
-### Push to registry
+# Restart a deployment
+kubectl rollout restart deployment/backend-dep -n three-tier-dev
 
-```bash
-docker push your-username/snake-backend:v1
-docker push your-username/snake-frontend:v1
-```
+# Delete all resources
+kubectl delete namespace three-tier-dev
 
----
-
-## ☸️ Kubernetes
-
-This app was designed for Kubernetes from the start. Key points for the DevOps engineer:
-
-|What|Detail|
-|---|---|
-|Backend env vars|Inject `MONGO_URI` and `PORT` via ConfigMap|
-|MongoDB password|Store in a Secret if auth is enabled|
-|Frontend API URL|Set `VITE_API_URL` as a build arg pointing to backend Service|
-|Health check|`GET /health` returns `{ status: 'ok' }` — use as `livenessProbe`|
-|MongoDB data|Mount a `PersistentVolumeClaim` to `/data/db`|
-|Scaling|Frontend and backend are stateless — safe to scale replicas|
-|MongoDB service name|Use `mongo-service` — backend MONGO_URI becomes `mongodb://mongo-service:27017/snakegame`|
-
-### Suggested resources
-
-```
-Frontend  → Deployment + Service (NodePort)
-Backend   → Deployment + Service (ClusterIP)
-MongoDB   → Deployment + Service (ClusterIP) + PersistentVolumeClaim
-           + ConfigMap (MONGO_URI) + Secret (password if needed)
-```
-
----
-
-## 🛑 Stopping the App
-
-```bash
-# Kill by port
+# Stop local dev processes
 sudo kill $(sudo lsof -t -i :5000)
 sudo kill $(sudo lsof -t -i :5173)
-
-# Or kill all node processes
-pkill -f node
 ```
 
 ---
 
 ## 🔧 Common Modifications
 
-|What to change|Where|What to edit|
-|---|---|---|
-|Game speed|`frontend/src/hooks/useGame.js`|`const SPEED = 150` (lower = faster)|
-|Grid size|`frontend/src/hooks/useGame.js`|`const COLS = 20` and `const ROWS = 20`|
-|Points per food|`frontend/src/hooks/useGame.js`|`setScore((s) => s + 10)`|
-|Number of top scores|`backend/src/routes/scores.js`|`.limit(10)`|
-|Colors|`frontend/src/App.css`|Edit hex color values|
-|App title|`frontend/index.html` + `frontend/src/App.jsx`|`<title>` and `<h1>` tags|
+| What to change | File | What to edit |
+|----------------|------|-------------|
+| Game speed | `frontend/src/hooks/useGame.js` | `const SPEED = 150` (lower = faster) |
+| Grid size | `frontend/src/hooks/useGame.js` | `const COLS` and `const ROWS` |
+| Points per food | `frontend/src/hooks/useGame.js` | `setScore((s) => s + 10)` |
+| Top scores shown | `backend/src/routes/scores.js` | `.limit(10)` |
+| App colors | `frontend/src/App.css` | Edit hex color values |
+| MongoDB credentials | `k8s-manifest/database/mongo-secret.yml` | Base64-encoded values |
+| Backend replicas | `k8s-manifest/backend/backend-dep.yml` | `replicas: 2` |
 
+---
 
 ## 📄 License
 
