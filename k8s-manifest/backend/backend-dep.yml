@@ -6,7 +6,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -15,6 +15,9 @@ spec:
       labels:
         app: backend
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: backend
         image: akifmhd/backend:1.0
@@ -23,4 +26,26 @@ spec:
         envFrom:
         - configMapRef:
             name: backend-config
-      
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10 ##Wait 10 seconds after the container starts before Kubernetes runs the first health check.
+          periodSeconds: 5 
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          limits:
+            memory: 250Mi
+            cpu: 500m
+          requests:
+            memory: 250Mi
+            cpu: 300m
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+

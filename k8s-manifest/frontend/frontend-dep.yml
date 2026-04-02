@@ -15,8 +15,33 @@ spec:
       labels:
         app: frontend
     spec:
+      securityContext:
+        seccompProfile: ##Use Kubernetes’ default secure system-call filter to restrict what the container can do at the OS level.
+          type: RuntimeDefault
       containers:
       - name: frontend
         image: akifmhd/frontend:1.1
         ports:
         - containerPort: 80
+        readinessProbe: 
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10 ##Wait 10 seconds after the container starts before Kubernetes runs the first health check.
+          periodSeconds: 5 ##Run the health check every 5 seconds after the first check.
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          limits:
+            memory: "100Mi"
+            cpu: "200m"
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
