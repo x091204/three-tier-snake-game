@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mongodb-deployment
   namespace: three-tier-dev
   labels:
     app: mongodb
 spec:
+  serviceName: "mongodb-svc"
   replicas: 1
   selector:
    matchLabels:
@@ -31,11 +32,38 @@ spec:
               secretKeyRef:
                 name: mongo-sec
                 key: mongo-root-password
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        readinessProbe:
+          exec:
+            command:
+              - mongosh
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+              - mongosh
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 15
         volumeMounts:
-        - name: mongo-volume
+        - name: mongodb-volume-claim
           mountPath: /data/db
-      volumes:
-      - name: mongo-volume
-        persistentVolumeClaim:
-          claimName: mongodb-volume-claim
-          
+      volumeClaimTemplates:
+        - metadata:
+            name: mongodb-volume-claim
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 100Mi
+            storageClassName: "standard"
