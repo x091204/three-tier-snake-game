@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: ingress
   namespace: three-tier-dev
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
   rules:
   - host: snake-game.com
