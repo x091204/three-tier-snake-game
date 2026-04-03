@@ -45,7 +45,7 @@ spec:
               - mongosh
               - --eval
               - "db.adminCommand('ping')"
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
           exec:
@@ -53,8 +53,9 @@ spec:
               - mongosh
               - --eval
               - "db.adminCommand('ping')"
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 15
+          failureThreshold: 5
         volumeMounts:
         - name: mongodb-volume-claim
           mountPath: /data/db
