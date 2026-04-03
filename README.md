@@ -8,27 +8,27 @@ A fully functional Snake Game built as a production-ready three-tier application
 
 ```
                         ┌──────────────────────────────────────────────┐
-                        │           Kind Kubernetes Cluster             │
-                        │           Namespace: three-tier-dev           │
-                        │                                               │
+                        │           Kind Kubernetes Cluster            │
+                        │           Namespace: three-tier-dev          │
+                        │                                              │
                         │   ┌─────────────┐                            │
-  Browser               │   │   Ingress    │  snake-game.com            │
+  Browser               │   │   Ingress    │  snake-game.com           │
   http://snake-game.com─┼──►│   (Nginx)   │                            │
                         │   └──────┬──────┘                            │
-                        │          │                                    │
-                        │    /     │     /api                           │
-                        │    ▼           ▼                              │
+                        │          │                                   │
+                        │    /     │     /api                          │
+                        │    ▼           ▼                             │
                         │  frontend-svc  backend-svc                   │
-                        │       │              │                        │
+                        │       │              │                       │
                         │  frontend pod   backend pod (x1)             │
                         │  (Nginx)        (Node.js)                    │
-                        │                      │                        │
+                        │                      │                       │
                         │               mongodb-svc                    │
                         │               (Headless)                     │
-                        │                      │                        │
+                        │                      │                       │
                         │              mongodb pod                     │
                         │              (StatefulSet)                   │
-                        │                      │                        │
+                        │                      │                       │
                         │                   PVC (100Mi)                │
                         └──────────────────────────────────────────────┘
 
