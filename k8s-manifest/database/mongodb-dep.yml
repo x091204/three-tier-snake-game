@@ -58,12 +58,12 @@ spec:
         volumeMounts:
         - name: mongodb-volume-claim
           mountPath: /data/db
-      volumeClaimTemplates:
-        - metadata:
-            name: mongodb-volume-claim
-          spec:
-            accessModes: ["ReadWriteOnce"]
-            resources:
-              requests:
-                storage: 100Mi
-            storageClassName: "standard"
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodb-volume-claim
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 100Mi
+        storageClassName: "standard"
