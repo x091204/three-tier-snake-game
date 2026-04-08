@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_USER = "akifmhd"
         IMAGE_NAME = "frontend:1.0"
         FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
@@ -19,5 +20,20 @@ pipeline {
                 git branch: 'main', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
             }
         }
+            }
+    stage('sonarqube analysis'){
+        steps{
+            dir('/frontend'){
+                withSonarQubeEnv('sonar-server') {
+                    sh """
+                    ${SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectName=three-tier-frontend \
+                    -Dsonar.projectKey=three-tier-frontend \
+                    -Dsonar.sources=. \
+                    """
+                }
+            }
+        }
     }
+      
 }
