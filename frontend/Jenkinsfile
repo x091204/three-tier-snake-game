@@ -20,9 +20,9 @@ pipeline {
                 git branch: 'main', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
             }
         }
-            }
+
         stage('sonarqube analysis'){
-        steps{
+            steps{
             dir('/frontend'){
                 withSonarQubeEnv('sonar-server') {
                     sh """
@@ -31,6 +31,7 @@ pipeline {
                     -Dsonar.projectKey=three-tier-frontend \
                     -Dsonar.sources=. \
                     """
+                }
                 }
             }
         }
