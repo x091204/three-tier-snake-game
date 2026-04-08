@@ -16,7 +16,7 @@ pipeline {
         }
         stage('cloning repo'){
             steps{
-                git branch: 'mainv1', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
             }
         }
     }
