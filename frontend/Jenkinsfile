@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_USER = "akifmhd"
+        IMAGE_NAME = "frontend:1.0"
+        FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
+
+    }
+    
+    stages{
+        stage('cleanigng workspace'){
+            steps{
+                cleanWs()
+            }
+        }
+        stage('cloning repo'){
+            steps{
+                git branch: 'mainv1', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
+            }
+    }
+    stage('sonarqube analysis'){
+        steps{
+            dir('/frontend'){
+
+            }
+        }
+    }
+    stage('code quality analysis'){
+        steps{
+            scripts{
+                waitforqualitygate abortPipeline: flase, credentialsId: ''
+            }
+        }
+    }
+    stage('Docker build'){
+        steps{
+            sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME} ."
+        }
+    }
+    stage('trivy scan'){
+        steps{
+                sh """
+                trivy image \
+                --severity HIGH,CRITICAL \
+                --ignore-unfixed \
+                --exit-code 1 \
+                ${FULL_IMAGE} \
+                > trivy-result.txt
+                """
+        }
+    }
+    }
+        
+}
