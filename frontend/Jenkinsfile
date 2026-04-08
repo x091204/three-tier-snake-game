@@ -21,7 +21,7 @@ pipeline {
             }
         }
             }
-    stage('sonarqube analysis'){
+        stage('sonarqube analysis'){
         steps{
             dir('/frontend'){
                 withSonarQubeEnv('sonar-server') {
