@@ -37,7 +37,9 @@ pipeline {
         }
         stage('building docker image'){
             steps{
+                dir('frontend'){
                 sh "docker build -t ${FULL_IMAGE} ."
+                }
             }
         }
         stage('trivy scan'){
