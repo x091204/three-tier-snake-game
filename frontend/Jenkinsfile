@@ -62,6 +62,7 @@ pipeline {
             }
         }
         stage('pusing to repo'){
+            steps{
             withCredentials([usernamePassword(
                 credentialsId: 'akifmhd', 
                 passwordVariable: 'password', 
@@ -71,6 +72,7 @@ pipeline {
                 echo $password | docker login -u $username --password-stdin
                 docker push ${FULL_IMAGE}
                 """
+                }
             }
         }
     }
