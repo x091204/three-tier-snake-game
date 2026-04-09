@@ -61,6 +61,28 @@ pipeline {
                 ${FULL_IMAGE} """
             }
         }
+        stage('pusing to repo'){
+            withCredentials([usernamePassword(
+                credentialsId: 'akifmhd', 
+                passwordVariable: 'password', 
+                usernameVariable: 'username'
+                )]) {
+                sh """
+                echo $password | docker login -u $username --password-stdin
+                docker push ${FULL_IMAGE}
+                """
+            }
+        }
     }
-      
+    post {
+        always {
+        sh "ls -la ${REPORTS_DIR}/"
+        archiveArtifacts artifacts: 'reports/*', allowEmptyArchive: true
+        cleanWs( patterns: [[pattern: '.trivy_cache/**', type: 'EXCLUDE']])
+        sh """
+                docker image prune -f
+                docker images ${IMAGE_NAME} --format "{{.Tag}}" | sort -r | tail -n +4 | xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
+            """
+        }
+    }
 }
