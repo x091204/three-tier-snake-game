@@ -46,6 +46,7 @@ pipeline {
         }
         stage('trivy scan'){
             steps{
+                dir('backend'){
                 sh "mkdir -p ${TRIVY_CACHE_DIR} ${REPORTS_DIR} trivy"
                 sh "wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O trivy/html.tpl"
                 sh """
@@ -60,6 +61,7 @@ pipeline {
                 --output ${REPORTS_DIR}/trivy-report.html \
                 --exit-code 1 \
                 ${FULL_IMAGE} """
+                }
             }
         }
         stage('pusing to repo'){
