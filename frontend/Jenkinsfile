@@ -58,7 +58,7 @@ pipeline {
                 --template "@trivy/html.tpl" \
                 --output ${REPORTS_DIR}/trivy-report.html \
                 --exit-code 1 \
-                ${FULL_IMAGE} \ """
+                ${FULL_IMAGE} """
             }
         }
     }
