@@ -1,0 +1,91 @@
+pipeline {
+    agent any
+
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+        DOCKER_USER = "akifmhd"
+        IMAGE_NAME = "backend:1.0"
+        FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
+        TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
+        REPORTS_DIR = "${WORKSPACE}/reports"
+
+    }
+    
+    stages{
+        stage('cleanigng workspace'){
+            steps{
+                cleanWs()
+            }
+        }
+        stage('cloning repo'){
+            steps{
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
+            }
+        }
+
+        stage('sonarqube analysis'){
+            steps{
+            dir('backend'){
+                withSonarQubeEnv('sonar-server') {
+                    sh """
+                    ${SCANNER_HOME}/bin/sonar-scanner \
+                    -Dsonar.projectName=three-tier-backend \
+                    -Dsonar.projectKey=three-tier-backend \
+                    -Dsonar.sources=. \
+                    """
+                }
+                }
+            }
+        }
+        stage('building docker image'){
+            steps{
+                dir('backend'){
+                sh "docker build -t ${FULL_IMAGE} ."
+                }
+            }
+        }
+        stage('trivy scan'){
+            steps{
+                sh "mkdir -p ${TRIVY_CACHE_DIR} ${REPORTS_DIR} trivy"
+                sh "wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O trivy/html.tpl"
+                sh """
+                trivy image \
+                --cache-dir ${TRIVY_CACHE_DIR} \
+                --severity HIGH,CRITICAL \
+                --ignore-unfixed \
+                --ignorefile .trivyignore \
+                --scanners vuln \
+                --format template \
+                --template "@trivy/html.tpl" \
+                --output ${REPORTS_DIR}/trivy-report.html \
+                --exit-code 1 \
+                ${FULL_IMAGE} """
+            }
+        }
+        stage('pusing to repo'){
+            steps{
+            withCredentials([usernamePassword(
+                credentialsId: 'akifmhd', 
+                passwordVariable: 'password', 
+                usernameVariable: 'username'
+                )]) {
+                sh """
+                echo $password | docker login -u $username --password-stdin
+                docker push ${FULL_IMAGE}
+                """
+                }
+            }
+        }
+    }
+    post {
+        always {
+        sh "ls -la ${REPORTS_DIR}/"
+        archiveArtifacts artifacts: 'reports/*', allowEmptyArchive: true
+        cleanWs( patterns: [[pattern: '.trivy_cache/**', type: 'EXCLUDE']])
+        sh """
+                docker image prune -f
+                docker images ${IMAGE_NAME} --format "{{.Tag}}" | sort -r | tail -n +4 | xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
+            """
+        }
+    }
+}
