@@ -6,6 +6,8 @@ pipeline {
         DOCKER_USER = "akifmhd"
         IMAGE_NAME = "frontend:1.0"
         FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
+        TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
+        REPORTS_DIR = "${WORKSPACE}/reports"
 
     }
     
@@ -44,14 +46,19 @@ pipeline {
         }
         stage('trivy scan'){
             steps{
+                sh "mkdir -p ${TRIVY_CACHE_DIR} ${REPORTS_DIR} trivy"
+                sh "wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O trivy/html.tpl"
                 sh """
                 trivy image \
+                --cache-dir ${TRIVY_CACHE_DIR} \
                 --severity HIGH,CRITICAL \
                 --ignore-unfixed \
+                --scanners vuln \
+                --format template \
+                --template "@trivy/html.tpl" \
+                --output ${REPORTS_DIR}/trivy-report.html \
                 --exit-code 1 \
-                ${FULL_IMAGE} \
-                > trivy-result.txt
-                """
+                ${FULL_IMAGE} \ """
             }
         }
     }
