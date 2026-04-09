@@ -35,11 +35,21 @@ pipeline {
                 }
             }
         }
-        stage('code quality analysis'){
+        stage('building docker image'){
             steps{
-                script{
-                    waitForQualityGate abortPipeline: false, CredentialsId: 'sonar-token'
-                }
+                sh "docker build -t ${FULL_IMAGE} ."
+            }
+        }
+        stage('trivy scan'){
+            steps{
+                sh """
+                trivy image \
+                --severity HIGH,CRITICAL \
+                --ignore-unfixed \
+                --exit-code 1 \
+                ${FULL_IMAGE} \
+                > trivy-result.txt
+                """
             }
         }
     }
