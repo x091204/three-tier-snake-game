@@ -35,6 +35,11 @@ pipeline {
                 }
             }
         }
+        stage('code quality analysis'){
+            steps{
+                waitForQualityGate abortPipeline: false CredentialsId: 'sonar-token'
+            }
+        }
     }
       
 }
