@@ -37,7 +37,9 @@ pipeline {
         }
         stage('code quality analysis'){
             steps{
+                script{
                 waitForQualityGate abortPipeline: false CredentialsId: 'sonar-token'
+                }
             }
         }
     }
