@@ -1,0 +1,11 @@
+namespace: three-tier-dev
+
+frontend:
+  image: akifmhd/frontend
+  tag: 1.1
+  replicasCount: 1
+
+backend:
+  image: akifmhd/backend
+  tag: 1.0
+  replicasCount: 1
