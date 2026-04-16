@@ -9,3 +9,8 @@ backend:
   image: akifmhd/backend
   tag: 1.0
   replicasCount: 1
+
+mongodb:
+  image: mongo
+  tag: 7.0 
+  replicasCount: 1
