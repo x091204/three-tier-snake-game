@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{  .Release.Name }}backend-deploy
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: backend
+spec:
+  replicas: {{ .Values.backend.replicasCount }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: backend
+        image: {{ .Values.backend.image }}:{{ .Values.backend.tag }}
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-backend-config
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10 
+          periodSeconds: 5 
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          limits:
+            memory: 250Mi
+            cpu: 500m
+          requests:
+            memory: 250Mi
+            cpu: 300m
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+

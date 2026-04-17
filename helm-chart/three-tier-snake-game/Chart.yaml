@@ -1,0 +1,18 @@
+apiVersion: v2
+name: three-tier-snake-game
+description: A Helm chart for three tier snake game application where the frontend, backend and database are deployed in separate pods.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+annotations:
+  category: gaming
+maintainers:
+  - name: akif
+    email: akifmuhammed009@example.com
+home: https://github.com/x091204
+sources:
+  - https://github.com/x091204/three-tier-snake-game.git
+keywords:
+  - snake-game
+  - three-tier
+  - helm
