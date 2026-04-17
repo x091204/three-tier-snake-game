@@ -4,5 +4,5 @@ metadata:
   name: {{ .Release.Name }}-backend-config
   namespace: {{ .Values.namespace }}
 data:
-  MONGO_URI: mongodb://username01:password01@mongodb-svc:27017/snakegame?authSource=admin
+  MONGO_URI: mongodb://username01:password01@{{ .Release.Name }}-mongodb-svc:27017/snakegame?authSource=admin
   PORT: "5000"
