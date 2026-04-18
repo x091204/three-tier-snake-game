@@ -1,6 +1,6 @@
 # 🐍 Three-Tier Snake Game
 
-A fully functional Snake Game built as a production-ready three-tier application with a complete DevSecOps CI/CD pipeline, containerized with Docker, and deployed on a multi-node Kubernetes cluster using Kind.
+A fully functional Snake Game built as a production-ready three-tier application with a complete DevSecOps CI/CD pipeline, containerized with Docker, and deployed on a multi-node Kubernetes cluster using Kind. Supports both raw Kubernetes manifests and Helm chart deployment.
 
 
 
@@ -8,182 +8,138 @@ A fully functional Snake Game built as a production-ready three-tier application
 
 ```
                         ┌──────────────────────────────────────────────┐
-                        │           Kind Kubernetes Cluster             │
-                        │           Namespace: three-tier-dev           │
-                        │                                               │
+                        │           Kind Kubernetes Cluster            │
+                        │           Namespace: three-tier-dev          │
+                        │                                              │
                         │   ┌─────────────┐                            │
-  Browser               │   │   Ingress    │  snake-game.com            │
+  Browser               │   │   Ingress    │  snake-game.com           │
   http://snake-game.com─┼──►│   (Nginx)   │                            │
                         │   └──────┬──────┘                            │
-                        │          │                                    │
-                        │    /     │     /api                           │
-                        │    ▼           ▼                              │
+                        │          │                                   │
+                        │    /     │     /api                          │
+                        │    ▼           ▼                             │
                         │  frontend-svc  backend-svc                   │
-                        │       │              │                        │
+                        │       │              │                       │
                         │  frontend pod   backend pod                  │
                         │  (Nginx)        (Node.js)                    │
-                        │                      │                        │
+                        │                      │                       │
                         │               mongodb-svc                    │
                         │               (Headless)                     │
-                        │                      │                        │
+                        │                      │                       │
                         │              mongodb pod                     │
                         │              (StatefulSet)                   │
-                        │                      │                        │
+                        │                      │                       │
                         │                   PVC (100Mi)                │
                         └──────────────────────────────────────────────┘
 
 Cluster: 1 control plane + 2 worker nodes
 ```
 
----
+
 
 ## 🔄 CI/CD Pipeline
-
-Both frontend and backend have independent Jenkins pipelines with SonarQube code analysis and Trivy security scanning.
 
 ```
 GitHub Push
     │
     ▼
-┌─────────────────┐
-│ Clean Workspace │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Clone Repo    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│    SonarQube    │  Code quality analysis
-│    Analysis     │  Quality Gate must pass
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Build Docker   │
-│     Image       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Trivy Scan    │  Scans for HIGH/CRITICAL CVEs
-│                 │  Generates HTML report
-│                 │  Blocks push if vulnerabilities found
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Push to Docker │
-│      Hub        │
-└─────────────────┘
-         │
-    Post Actions:
-    - Archive Trivy report
-    - Prune old Docker images
-    - Clean workspace
+Clean Workspace → Clone Repo → SonarQube Analysis → Build Docker Image → Trivy Scan → Push to Docker Hub
+                                                                              │
+                                                                    blocks on HIGH/CRITICAL CVEs
+                                                                    generates HTML report
 ```
-
-### Pipeline stages explained
 
 | Stage | What it does |
 |-------|-------------|
-| Clean workspace | Wipes the Jenkins workspace before starting |
+| Clean workspace | Wipes Jenkins workspace before starting |
 | Clone repo | Pulls latest code from GitHub main branch |
-| SonarQube analysis | Scans source code for bugs, vulnerabilities, and code smells |
-| Build Docker image | Builds the Docker image from the Dockerfile |
-| Trivy scan | Scans the built image for HIGH and CRITICAL CVEs, generates HTML report, blocks push if found |
-| Push to Docker Hub | Authenticates and pushes image to Docker Hub using Jenkins credentials |
-| Post actions | Archives the Trivy HTML report, prunes old images, cleans workspace |
+| SonarQube analysis | Scans source code for bugs, vulnerabilities, code smells |
+| Build Docker image | Builds image from Dockerfile |
+| Trivy scan | Scans image for HIGH/CRITICAL CVEs, blocks push if found |
+| Push to Docker Hub | Pushes image using Jenkins credentials |
+| Post actions | Archives Trivy HTML report, prunes old images, cleans workspace |
 
-### Jenkins credentials required
 
-| Credential ID | Type | Used for |
-|--------------|------|---------|
-| `akifmhd` | Username/Password | Docker Hub login |
-
-### Jenkins tools required
-
-| Tool | Name in Jenkins |
-|------|----------------|
-| SonarQube Scanner | `sonar-scanner` |
-| SonarQube Server | `sonar-server` |
-
----
 
 ## 🎮 What the App Does
 
 - Snake game on a 20×20 grid controlled with arrow keys
 - Score increases by 10 points per food eaten
-- Score is automatically saved to MongoDB when the game ends
-- Scoreboard on the left shows the top 10 highest scores
+- Score automatically saved to MongoDB when the game ends
+- Scoreboard shows the top 10 highest scores
 - Scoreboard refreshes automatically after every game
 
----
+
 
 ## 🗂️ Project Structure
 
 ```
 three-tier-snake-game/
 │
-├── backend/                          # Node.js + Express API
+├── backend/                            # Node.js + Express API
 │   ├── src/
-│   │   ├── config/db.js              # MongoDB connection
-│   │   ├── models/Score.js           # Mongoose schema
-│   │   ├── routes/scores.js          # POST and GET endpoints
-│   │   └── server.js                 # Express entry point
+│   │   ├── config/db.js                # MongoDB connection
+│   │   ├── models/Score.js             # Mongoose schema
+│   │   ├── routes/scores.js            # POST and GET endpoints
+│   │   └── server.js                   # Express entry point
 │   ├── Dockerfile
 │   ├── .dockerignore
-│   ├── .env                          # Local dev only — never commit
+│   ├── .trivyignore
+│   ├── .env                            # Local dev only — never commit
 │   └── package.json
 │
-├── frontend/                         # React + Vite
+├── frontend/                           # React + Vite
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Game.jsx              # Game grid renderer
-│   │   │   └── Scoreboard.jsx        # Top 10 scores table
+│   │   │   ├── Game.jsx                # Game grid renderer
+│   │   │   └── Scoreboard.jsx          # Top 10 scores table
 │   │   ├── hooks/
-│   │   │   └── useGame.js            # All game logic
-│   │   ├── App.jsx                   # Root component
-│   │   ├── App.css                   # All styling
-│   │   ├── api.js                    # All HTTP calls
-│   │   └── main.jsx                  # React entry point
+│   │   │   └── useGame.js              # All game logic
+│   │   ├── App.jsx                     # Root component
+│   │   ├── App.css                     # All styling
+│   │   ├── api.js                      # All HTTP calls
+│   │   └── main.jsx                    # React entry point
 │   ├── index.html
 │   ├── vite.config.js
 │   ├── .env.development
 │   ├── .env.production
 │   ├── Dockerfile
-│   ├── .dockerignore
 │   └── package.json
 │
-├── jenkins-pipeline/                 # CI/CD pipelines
-│   ├── backend/
-│   │   └── Jenkinsfile               # Backend pipeline
-│   └── frontend/
-│       └── Jenkinsfile               # Frontend pipeline
+├── helm-chart/                         # Helm chart deployment
+│   └── three-tier-snake-game/
+│       ├── Chart.yaml                  # Chart metadata
+│       ├── values.yaml                 # All configurable values
+│       └── templates/
+│           ├── frontend-dep.yml
+│           ├── frontend-svc.yml
+│           ├── backend-dep.yml
+│           ├── backend-svc.yml
+│           ├── backend-configmap.yml
+│           ├── mongodb-dep.yml         # StatefulSet
+│           ├── mongo-svc.yml           # Headless service
+│           ├── mongo-secret.yml
+│           └── ingress.yml
 │
-├── k8s-manifest/                     # Kubernetes manifests
+├── k8s-manifest/                       # Raw Kubernetes manifests
 │   ├── namespace.yml
 │   ├── ingress.yml
-│   ├── cluster.yml                   # Kind cluster config
 │   ├── frontend/
-│   │   ├── frontend-dep.yml
-│   │   └── frontend-svc.yml
 │   ├── backend/
-│   │   ├── backend-dep.yml
-│   │   ├── backend-svc.yml
-│   │   └── backend-configmap.yml
 │   └── database/
-│       ├── mongodb-dep.yml           # StatefulSet
-│       ├── mongo-svc.yml             # Headless Service
-│       └── mongo-secret.yml
+│
+├── jenkins-pipeline/                   # CI/CD pipelines
+│   ├── backend/Jenkinsfile
+│   └── frontend/Jenkinsfile
+│
+├── z-documentation/                    # Full project documentation
+│   └── three-tier-snake-game-docs.docx
 │
 ├── docker-compose.yml
 └── README.md
 ```
 
----
+
 
 ## ⚙️ Tech Stack
 
@@ -195,16 +151,15 @@ three-tier-snake-game/
 | CI/CD | Jenkins, SonarQube, Trivy |
 | Container | Docker |
 | Orchestration | Kubernetes (Kind) |
+| Package Manager | Helm |
 | Ingress | Nginx Ingress Controller |
 | Persistence | PersistentVolumeClaim via StatefulSet (100Mi) |
 
----
+
 
 ## 🚀 Running Locally
 
-### Option 1 — Manual (two terminals)
-
-**Prerequisites:** Node.js v20+, MongoDB running locally
+### Option 1 — Manual
 
 ```bash
 # Terminal 1 — backend
@@ -219,8 +174,6 @@ npm run dev
 # → http://localhost:5173
 ```
 
-**Environment files needed:**
-
 `backend/.env`
 ```
 MONGO_URI=mongodb://localhost:27017/snakegame
@@ -231,8 +184,6 @@ PORT=5000
 ```
 VITE_API_URL=http://localhost:5000
 ```
-
----
 
 ### Option 2 — Docker Compose
 
@@ -246,64 +197,103 @@ docker compose up
 | Backend | http://localhost:5000 |
 | MongoDB | localhost:27017 |
 
----
 
-## 🔧 Jenkins Pipeline Setup
+
+## ☸️ Kubernetes Deployment
 
 ### Prerequisites
 
-- Jenkins installed and running
-- Docker installed on the Jenkins agent
-- Trivy installed on the Jenkins agent
-- SonarQube server running and configured in Jenkins
+- Kind cluster running
+- Nginx Ingress Controller installed
+- Docker images pushed to registry
+- `snake-game.com` added to `/etc/hosts`
 
-### Step 1 — Configure SonarQube in Jenkins
-
-Go to `Jenkins → Manage Jenkins → Configure System`:
-- Add SonarQube server with name `sonar-server`
-- Add SonarQube Scanner tool with name `sonar-scanner`
-
-### Step 2 — Add Docker Hub credentials
-
-Go to `Jenkins → Manage Jenkins → Credentials`:
-- Add Username/Password credential
-- Set ID as `akifmhd`
-- Enter your Docker Hub username and password
-
-### Step 3 — Create pipelines
-
-Create two Pipeline jobs in Jenkins:
-- `frontend-snake-game` — point to `jenkins-pipeline/frontend/Jenkinsfile`
-- `backend` — point to `jenkins-pipeline/backend/Jenkinsfile`
-
-### Step 4 — Run the pipeline
-
-Click **Build Now** on each pipeline. The Trivy HTML report will be archived as a build artifact after each run.
-
----
-
-## ☸️ Kubernetes Deployment (Kind)
-
-### Step 1 — Create Kind cluster
+### Create Kind cluster
 
 ```bash
 kind create cluster --config k8s-manifest/cluster.yml --name three-tier
 ```
 
-> Update the `hostPath` values in `cluster.yml` to match your local machine path before creating the cluster.
-
-### Step 2 — Install Nginx Ingress Controller
+### Install Nginx Ingress Controller
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/component=controller \
-  --timeout=90s
 ```
 
-### Step 3 — Apply all manifests
+### Add host entry
+
+```bash
+# Add to /etc/hosts
+127.0.0.1   snake-game.com
+```
+
+
+
+## 🎯 Deploy with Helm (Recommended)
+
+Helm deploys the entire application with a single command.
+
+### Install
+
+```bash
+helm install snake-game ./helm-chart/three-tier-snake-game
+```
+
+### Verify
+
+```bash
+helm list
+kubectl get all -n three-tier-dev
+```
+
+### Upgrade (e.g. new image tag)
+
+```bash
+helm upgrade snake-game ./helm-chart/three-tier-snake-game --set backend.tag=2.0
+```
+
+### Change replicas
+
+```bash
+helm upgrade snake-game ./helm-chart/three-tier-snake-game --set backend.replicasCount=2
+```
+
+### Rollback
+
+```bash
+helm rollback snake-game 1
+```
+
+### Uninstall
+
+```bash
+helm uninstall snake-game
+```
+
+### values.yaml — all configurable values
+
+```yaml
+namespace: three-tier-dev
+
+frontend:
+  image: akifmhd/frontend
+  tag: "1.1"
+  replicasCount: 1
+
+backend:
+  image: akifmhd/backend
+  tag: "1.0"
+  replicasCount: 1
+
+mongodb:
+  image: mongo
+  tag: "7.0"
+  replicasCount: 1
+```
+
+
+
+## 📋 Deploy with Raw Manifests
 
 ```bash
 kubectl apply -f k8s-manifest/namespace.yml
@@ -313,64 +303,40 @@ kubectl apply -f k8s-manifest/frontend/
 kubectl apply -f k8s-manifest/ingress.yml
 ```
 
-### Step 4 — Add host entry
 
-```bash
-sudo nano /etc/hosts
-# Add: 127.0.0.1   snake-game.com
-```
-
-### Step 5 — Verify
-
-```bash
-kubectl get all -n three-tier-dev
-```
-
-### Step 6 — Open the app
-
-```
-http://snake-game.com
-```
-
----
 
 ## 📡 API Reference
 
 | Method | Endpoint | Body | Description |
 |--------|----------|------|-------------|
 | GET | `/health` | — | Kubernetes liveness probe |
-| POST | `/api/scores` | `{ score: Number }` | Save a score after game over |
+| POST | `/api/scores` | `{ score: Number }` | Save a score |
 | GET | `/api/scores` | — | Get top 10 scores |
 
----
 
-## 🗄️ Database
 
-- **Type:** StatefulSet with PersistentVolumeClaim
-- **Database name:** `snakegame`
-- **Collection:** `scores`
-- **Credentials:** injected via Kubernetes Secret (`mongo-sec`)
-- **Storage:** 100Mi PVC mounted at `/data/db`
+## 🔧 Jenkins Pipeline Setup
 
----
+### Jenkins credentials required
 
-## 🔧 Kubernetes Resources Summary
+| Credential ID | Type | Used for |
+|--------------|------|---------|
+| `akifmhd` | Username/Password | Docker Hub login |
 
-| Resource | Name | Details |
-|----------|------|---------|
-| Namespace | `three-tier-dev` | Isolates all app resources |
-| Deployment | `frontend-deployment` | Nginx serving React app |
-| Deployment | `backend-dep` | Node.js API |
-| StatefulSet | `mongodb-deployment` | MongoDB with stable storage |
-| Service | `frontend-svc` | ClusterIP — port 80 |
-| Service | `backend-svc` | ClusterIP — port 5000 |
-| Service | `mongodb-svc` | Headless — port 27017 |
-| ConfigMap | `backend-config` | `MONGO_URI` and `PORT` |
-| Secret | `mongo-sec` | MongoDB root credentials |
-| PVC | `mongodb-volume-claim` | Auto-created by StatefulSet |
-| Ingress | `ingress` | Routes `/` → frontend, `/api` → backend |
+### Jenkins tools required
 
----
+| Tool | Name in Jenkins |
+|------|----------------|
+| SonarQube Scanner | `sonar-scanner` |
+| SonarQube Server | `sonar-server` |
+
+### Create pipelines
+
+Create two Pipeline jobs in Jenkins:
+- `frontend-snake-game` → `jenkins-pipeline/frontend/Jenkinsfile`
+- `backend` → `jenkins-pipeline/backend/Jenkinsfile`
+
+
 
 ## 🛡️ Security Features
 
@@ -381,10 +347,10 @@ http://snake-game.com
 | `seccompProfile: RuntimeDefault` | Frontend pod, Backend pod |
 | `allowPrivilegeEscalation: false` | Frontend container, Backend container |
 | `privileged: false` | Frontend container, Backend container |
-| Credentials via Secret | MongoDB — never hardcoded |
+| Credentials via Kubernetes Secret | MongoDB — never hardcoded |
 | Docker Hub credentials via Jenkins | Never hardcoded in pipeline |
 
----
+
 
 ## 📊 Resource Limits
 
@@ -394,17 +360,17 @@ http://snake-game.com
 | Backend | 250Mi | 250Mi | 300m | 500m |
 | MongoDB | 256Mi | 512Mi | 250m | 500m |
 
----
+
 
 ## 🔍 Health Checks
 
-| Tier | Type | Path | Initial Delay |
-|------|------|------|--------------|
-| Frontend | HTTP GET | `/` port 80 | 10s / 15s |
-| Backend | HTTP GET | `/health` port 5000 | 10s / 15s |
-| MongoDB | exec mongosh ping | — | 15s / 30s |
+| Tier | Type | Path | Readiness Delay | Liveness Delay |
+|------|------|------|----------------|----------------|
+| Frontend | HTTP GET | `/` port 80 | 10s | 15s |
+| Backend | HTTP GET | `/health` port 5000 | 10s | 15s |
+| MongoDB | exec mongosh ping | — | 30s | 60s |
 
----
+
 
 ## 🛑 Useful Commands
 
@@ -414,25 +380,39 @@ kubectl get pods -n three-tier-dev -o wide
 
 # Stream logs
 kubectl logs -f deployment/backend-dep -n three-tier-dev
-kubectl logs -f deployment/frontend-deployment -n three-tier-dev
 kubectl logs -f statefulset/mongodb-deployment -n three-tier-dev
+
+# Helm status
+helm status snake-game
+helm history snake-game
 
 # Restart a deployment
 kubectl rollout restart deployment/backend-dep -n three-tier-dev
 
 # Port forward for quick testing
 kubectl port-forward svc/frontend-svc 8080:80 -n three-tier-dev
-kubectl port-forward svc/backend-svc 5000:5000 -n three-tier-dev
 
-# Delete everything
+# Delete everything (Helm)
+helm uninstall snake-game
+
+# Delete everything (raw manifests)
 kubectl delete namespace three-tier-dev
-
-# Stop local dev
-sudo kill $(sudo lsof -t -i :5000)
-sudo kill $(sudo lsof -t -i :5173)
 ```
 
----
+
+
+## 🔧 Common Modifications
+
+| What to change | File | What to edit |
+|----------------|------|-------------|
+| Image tag | `helm-chart/.../values.yaml` | `frontend.tag` or `backend.tag` |
+| Replicas | `helm-chart/.../values.yaml` | `backend.replicasCount` |
+| Game speed | `frontend/src/hooks/useGame.js` | `const SPEED = 150` |
+| Grid size | `frontend/src/hooks/useGame.js` | `const COLS` and `const ROWS` |
+| Points per food | `frontend/src/hooks/useGame.js` | `setScore((s) => s + 10)` |
+| Top scores shown | `backend/src/routes/scores.js` | `.limit(10)` |
+
+
 
 ## 📄 License
 
