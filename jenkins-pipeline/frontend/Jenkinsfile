@@ -4,7 +4,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_USER = "akifmhd"
-        IMAGE_NAME = "frontend:1.1"
+        IMAGE_NAME = "frontend:1.0"
         FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
         TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         REPORTS_DIR = "${WORKSPACE}/reports"
@@ -19,7 +19,7 @@ pipeline {
         }
         stage('cloning repo'){
             steps{
-                git branch: 'dev', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
             }
         }
 
