@@ -12,7 +12,7 @@ A fully functional Snake Game built as a production-ready three-tier application
                         │           Namespace: three-tier-dev          │
                         │                                              │
                         │   ┌─────────────┐                            │
-  Browser               │   │   Ingress    │  snake-game.com           │
+  Browser               │   │   Ingress   │  snake-game.com           │
   http://snake-game.com─┼──►│   (Nginx)   │                            │
                         │   └──────┬──────┘                            │
                         │          │                                   │
