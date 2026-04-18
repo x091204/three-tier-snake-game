@@ -4,7 +4,7 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_USER = "akifmhd"
-        IMAGE_NAME = "frontend:1.0"
+        IMAGE_NAME = "frontend:1.1"
         FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
         TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         REPORTS_DIR = "${WORKSPACE}/reports"
