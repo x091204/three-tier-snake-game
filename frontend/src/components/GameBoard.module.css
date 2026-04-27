@@ -1,0 +1,69 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.scoreBar {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-2);
+}
+
+.value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+}
+
+.grid {
+  display: grid;
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+}
+
+.cell {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--border);
+}
+
+.head  { background: var(--accent); }
+.snake { background: #6d4ddb; }
+.food  { background: #ffffff; border-radius: 50%; }
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+}
+
+.btn {
+  padding: 10px 32px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  transition: opacity 0.2s;
+}
+
+.btn:hover { opacity: 0.85; }
+
+.dead {
+  font-size: 0.75rem;
+  color: var(--text-2);
+  letter-spacing: 1px;
+}

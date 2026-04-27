@@ -1,0 +1,62 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-shadow: 0 0 12px rgba(167, 139, 250, 0.3);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.username {
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+
+.navBtn {
+  background: none;
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.navBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  gap: 48px;
+  padding: 40px 32px;
+  align-items: flex-start;
+}
+
+.sidebar { width: 220px; flex-shrink: 0; }
+
+.gameArea {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}

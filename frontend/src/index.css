@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Press+Start+2P&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:       #000000;
+  --surface:  #0a0a0a;
+  --border:   #1a1a1a;
+  --border-2: #2a2a2a;
+  --text:     #ffffff;
+  --text-2:   #888888;
+  --text-3:   #444444;
+  --accent:   #a78bfa;
+  --danger:   #ff4444;
+  --success:  #44ff88;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: 'Inter', sans-serif; cursor: pointer; }
+input  { font-family: 'Inter', sans-serif; }
+
+.pixel { font-family: 'Press Start 2P', monospace; }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getTopScores } from '../api';
+import s from './Scoreboard.module.css';
 
 export default function Scoreboard({ refreshTrigger }) {
   const [scores,  setScores]  = useState([]);
@@ -7,7 +8,7 @@ export default function Scoreboard({ refreshTrigger }) {
   const [error,   setError]   = useState(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchScores = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -19,31 +20,29 @@ export default function Scoreboard({ refreshTrigger }) {
         setLoading(false);
       }
     };
-    fetch();
-  }, [refreshTrigger]); // re-fetches every time a score is saved
+    fetchScores();
+  }, [refreshTrigger]);
 
   return (
-    <div className="scoreboard">
-      <h2>Top 10 Scores</h2>
-
-      {loading && <p>Loading...</p>}
-      {error   && <p className="error">{error}</p>}
-
+    <div className={s.board}>
+      <p className={s.title}>Leaderboard</p>
+      {loading && <p className={s.msg}>Loading...</p>}
+      {error   && <p className={s.error}>{error}</p>}
       {!loading && !error && (
-        <table>
+        <table className={s.table}>
           <thead>
             <tr>
-              <th>Rank</th>
+              <th>#</th>
+              <th>Player</th>
               <th>Score</th>
-              <th>Date</th>
             </tr>
           </thead>
           <tbody>
             {scores.map((s, i) => (
               <tr key={s._id}>
-                <td>#{i + 1}</td>
+                <td>{i + 1}</td>
+                <td>{s.username}</td>
                 <td>{s.score}</td>
-                <td>{new Date(s.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
