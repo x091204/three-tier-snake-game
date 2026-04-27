@@ -25,9 +25,15 @@ export default function Scoreboard({ refreshTrigger }) {
 
   return (
     <div className={s.board}>
-      <p className={s.title}>Leaderboard</p>
+      <div className={s.titleWrap}>
+        <p className={`${s.pixelTitle} pixel`}>SCORE</p>
+      </div>
+
+      <p className={s.label}>Leaderboard</p>
+
       {loading && <p className={s.msg}>Loading...</p>}
       {error   && <p className={s.error}>{error}</p>}
+
       {!loading && !error && (
         <table className={s.table}>
           <thead>
@@ -38,11 +44,11 @@ export default function Scoreboard({ refreshTrigger }) {
             </tr>
           </thead>
           <tbody>
-            {scores.map((s, i) => (
-              <tr key={s._id}>
+            {scores.map((score, i) => (
+              <tr key={score._id}>
                 <td>{i + 1}</td>
-                <td>{s.username}</td>
-                <td>{s.score}</td>
+                <td>{score.username || '—'}</td>
+                <td>{score.score}</td>
               </tr>
             ))}
           </tbody>

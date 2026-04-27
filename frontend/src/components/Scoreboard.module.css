@@ -1,12 +1,29 @@
-.board { width: 100%; }
+.board {
+  width: 100%;
+}
 
-.title {
+.titleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.pixelTitle {
+  font-size: 0.75rem;
+  color: var(--accent);
+  line-height: 1.6;
+  text-shadow: 0 0 16px rgba(167, 139, 250, 0.4);
+  letter-spacing: 1px;
+}
+
+.label {
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--text-2);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .table {

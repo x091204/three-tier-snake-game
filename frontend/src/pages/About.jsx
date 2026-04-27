@@ -7,7 +7,7 @@ export default function About() {
   return (
     <div className={s.page}>
       <header className={s.header}>
-        <span className={`${s.logo} pixel`}>SNAKE</span>
+        <span className={`${s.logo} pixel`}>SNAKEGAME</span>
         <button className={s.back} onClick={() => navigate('/game')}>
           ← Back
         </button>
@@ -61,11 +61,10 @@ export default function About() {
 
         <section className={s.author}>
           <p className={s.authorTag}>Built by</p>
-          <p className={s.authorName}>Akif Muhammed MC</p>
-          <p className={s.authorRole}>Cloud & DevOps Engineer — Kerala, India</p>
+          <p className={s.authorName}>akif muhammed</p>
+          <p className={s.authorRole}>Cloud & DevOps Engineer</p>
           <p className={s.authorBio}>
-            Started with Git just for fun. Ended up building production-grade
-            Kubernetes deployments with full DevSecOps pipelines — all within a few months.
+            This app serves as the living documentation of my DevOps evolution.
           </p>
           <div className={s.links}>
             <a href="https://github.com/x091204" target="_blank" rel="noreferrer">GitHub →</a>

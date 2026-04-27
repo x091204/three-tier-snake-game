@@ -18,7 +18,7 @@ export default function GamePage() {
   return (
     <div className={s.page}>
       <header className={s.header}>
-        <span className={`${s.logo} pixel`}>SNAKE</span>
+        <span className={`${s.logo} pixel`}>SNAKEGAME</span>
         <div className={s.nav}>
           <span className={s.username}>{user?.username}</span>
           <button className={s.navBtn} onClick={() => navigate('/about')}>About</button>

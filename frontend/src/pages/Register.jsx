@@ -6,6 +6,7 @@ import s from './Auth.module.css';
 export default function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const [error,    setError]    = useState('');
   const [loading,  setLoading]  = useState(false);
   const navigate                = useNavigate();
@@ -44,16 +45,27 @@ export default function Register() {
             minLength={3}
             required
           />
-          <input
-            className={s.input}
-            type="password"
-            placeholder="Password (min 6 chars)"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            minLength={6}
-            required
-          />
+          <div className={s.passWrap}>
+            <input
+              className={s.input}
+              type={showPass ? 'text' : 'password'}
+              placeholder="Password (min 6 chars)"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              minLength={6}
+              required
+            />
+            <button
+              type="button"
+              className={s.eyeBtn}
+              onClick={() => setShowPass(p => !p)}
+            >
+              {showPass ? 'Hide' : 'Show'}
+            </button>
+          </div>
+
           {error && <p className={s.error}>{error}</p>}
+
           <button className={s.btn} type="submit" disabled={loading}>
             {loading ? 'Creating account...' : 'Register'}
           </button>
