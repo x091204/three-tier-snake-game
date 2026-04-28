@@ -1,4 +1,5 @@
 services:
+
   database:
     container_name: database
     image: mongo
@@ -18,6 +19,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    
   backend:
     container_name: backend
     image: akifmhd/backend:1.0.1
@@ -30,6 +32,7 @@ services:
         condition: service_healthy
     env_file:
       - ./backend/.env.docker
+    restart: unless-stopped
 
   frontend:
     container_name: frontend
@@ -40,6 +43,7 @@ services:
       - three-tier
     depends_on:
       - backend
+    restart: unless-stopped
   
   auth-service:
     container_name: auth-service
@@ -53,6 +57,7 @@ services:
         condition: service_healthy
     env_file:
       - ./auth-service/.env.docker
+    restart: unless-stopped
 
 volumes:
   mongo_database:
