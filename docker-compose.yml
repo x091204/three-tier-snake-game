@@ -20,7 +20,7 @@ services:
       start_period: 30s
   backend:
     container_name: backend
-    image: backend:v1
+    image: akifmhd/backend:1.0.1
     ports:
       - "5000:5000"
     networks:
@@ -29,17 +29,30 @@ services:
       database:
         condition: service_healthy
     env_file:
-      - ./backend/.env
+      - ./backend/.env.docker
 
   frontend:
     container_name: frontend
-    image: frontend:v1
+    image: akifmhd/frontend:1.0.1
     ports:
       - "8080:80"
     networks:
       - three-tier
     depends_on:
       - backend
+  
+  auth-service:
+    container_name: auth-service
+    image: akifmhd/auth-service:1.0
+    ports:
+      - "4000:4000"
+    networks:
+      - three-tier
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - ./auth-service/.env.docker
 
 volumes:
   mongo_database:
