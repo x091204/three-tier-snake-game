@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{  .Release.Name }}backend-deploy
+  name: {{  .Release.Name }}-backend-deploy
   namespace: {{ .Values.namespace }}
   labels:
     app: backend
