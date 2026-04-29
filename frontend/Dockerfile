@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN cp .env.docker .env.production
+##RUN cp .env.docker .env.production
 RUN npm run build
 
 FROM nginx:alpine

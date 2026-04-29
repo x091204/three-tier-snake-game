@@ -27,3 +27,11 @@ spec:
             name: frontend-svc
             port:
               number: 80
+      
+      - path: /auth
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-svc
+            port:
+              number: 4000

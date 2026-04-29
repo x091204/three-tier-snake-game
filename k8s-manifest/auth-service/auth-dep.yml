@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-dep
+  name: auth-dep
   namespace: three-tier-dev
   labels:
-    app: backend
+    app: auth
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: auth
   template:
     metadata:
       labels:
-        app: backend
+        app: auth
     spec:
       securityContext:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: backend
-        image: akifmhd/backend:1.0.1
+      - name: auth-service
+        image: akifmhd/auth-service:1.0
         ports:
-        - containerPort: 5000
+        - containerPort: 4000
         envFrom:
         - configMapRef:
-            name: backend-config
+            name: auth-config
         env:
         - name: JWT_SECRET
           valueFrom:
@@ -35,13 +35,13 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: 5000
-          initialDelaySeconds: 10 ##Wait 10 seconds after the container starts before Kubernetes runs the first health check.
-          periodSeconds: 5 
+            port: 4000
+          initialDelaySeconds: 10
+          periodSeconds: 5
         livenessProbe:
           httpGet:
             path: /health
-            port: 5000
+            port: 4000
           initialDelaySeconds: 15
           periodSeconds: 10
         resources:
@@ -54,4 +54,3 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
-
