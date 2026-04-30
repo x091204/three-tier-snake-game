@@ -4,13 +4,12 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_USER = "akifmhd"
-        IMAGE_NAME = "backend:1.0"
+        IMAGE_NAME = "auth-service:1.0"
         FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
         TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         REPORTS_DIR = "${WORKSPACE}/reports"
-
     }
-    
+
     stages{
         stage('cleaning workspace'){
             steps{
@@ -22,31 +21,30 @@ pipeline {
                 git branch: 'main', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
             }
         }
-
         stage('sonarqube analysis'){
             steps{
-            dir('backend'){
-                withSonarQubeEnv('sonar-server') {
-                    sh """
-                    ${SCANNER_HOME}/bin/sonar-scanner \
-                    -Dsonar.projectName=three-tier-backend \
-                    -Dsonar.projectKey=three-tier-backend \
-                    -Dsonar.sources=. 
-                    """
-                }
+                dir('auth-service'){
+                    withSonarQubeEnv('sonar-server'){
+                        sh """
+                        ${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectName=three-tier-auth-service \
+                        -Dsonar.projectKey=three-tier-auth-service \
+                        -Dsonar.sources=. 
+                        """
+                    }
                 }
             }
         }
         stage('building docker image'){
             steps{
-                dir('backend'){
-                sh "docker build -t ${FULL_IMAGE} ."
+                dir('auth-service'){
+                    sh "docker build -t ${FULL_IMAGE} ."
                 }
             }
         }
         stage('trivy scan'){
             steps{
-                dir('backend'){
+                dir('auth-service'){
                 sh "mkdir -p ${TRIVY_CACHE_DIR} ${REPORTS_DIR} trivy"
                 sh "wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O trivy/html.tpl"
                 sh """
@@ -64,10 +62,10 @@ pipeline {
                 }
             }
         }
-        stage('pusing to repo'){
+        stage('pushing docker image'){
             steps{
             withCredentials([usernamePassword(
-                credentialsId: 'akifmhd', 
+                credentialsId: 'docker', 
                 passwordVariable: 'password', 
                 usernameVariable: 'username'
                 )]) {
