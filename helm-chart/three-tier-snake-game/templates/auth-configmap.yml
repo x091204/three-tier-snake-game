@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-auth-config
+  namespace: {{ .Values.namespace }}
+data:
+  MONGO_URI: mongodb://username01:password01@{{ .Release.Name }}-mongodb-svc:27017/snakegame?authSource=admin
+  PORT: "4000"

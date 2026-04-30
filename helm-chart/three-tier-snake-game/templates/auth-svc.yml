@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-auth-svc
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: auth
+  ports:
+  - name: auth-svc
+    protocol: TCP
+    port: 4000
+    targetPort: 4000

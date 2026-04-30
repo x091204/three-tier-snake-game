@@ -27,3 +27,10 @@ spec:
             name: {{ .Release.Name }}-frontend-svc
             port:
               number: 80
+      - path: /auth
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-auth-svc
+            port:
+              number: 4000
