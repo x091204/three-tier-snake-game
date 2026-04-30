@@ -45,22 +45,36 @@ pipeline {
         stage('trivy scan'){
             steps{
                 dir('auth-service'){
-                sh "mkdir -p ${TRIVY_CACHE_DIR} ${REPORTS_DIR} trivy"
-                sh "wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O trivy/html.tpl"
-                sh """
-                trivy image \
-                --cache-dir ${TRIVY_CACHE_DIR} \
-                --severity HIGH,CRITICAL \
-                --ignore-unfixed \
-                --scanners vuln \
-                --format template \
-                --template "@trivy/html.tpl" \
-                --output ${REPORTS_DIR}/trivy-report.html \
-                --exit-code 1 \
-                ${FULL_IMAGE} """
+                    sh "mkdir -p ${TRIVY_CACHE_DIR} ${REPORTS_DIR} trivy"
+                    sh "wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -O trivy/html.tpl"
+            
+            // Step 1 — generate report always (exit code 0 so it never fails)
+                    sh """
+                    trivy image \
+                    --cache-dir ${TRIVY_CACHE_DIR} \
+                    --severity HIGH,CRITICAL \
+                    --ignore-unfixed \
+                    --scanners vuln \
+                    --format template \
+                    --template "@trivy/html.tpl" \
+                    --output ${REPORTS_DIR}/trivy-report.html \
+                    --exit-code 0 \
+                    ${FULL_IMAGE}
+                    """
+            
+            // Step 2 — now fail the pipeline if vulnerabilities found
+                    sh """
+                    trivy image \
+                    --cache-dir ${TRIVY_CACHE_DIR} \
+                    --severity HIGH,CRITICAL \
+                    --ignore-unfixed \
+                    --scanners vuln \
+                    --exit-code 1 \
+                    ${FULL_IMAGE}
+                    """
+                    }
                 }
             }
-        }
         stage('pushing docker image'){
             steps{
             withCredentials([usernamePassword(
