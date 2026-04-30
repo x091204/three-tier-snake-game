@@ -35,6 +35,13 @@ pipeline {
                 }
             }
         }
+        stage('code quality analysis') {
+	        steps{
+		        script{
+		            waitForQualityGate abortPipeline: false, CredentialsIs: 'sonarqube'
+		        }
+	        }
+        }
         stage('building docker image'){
             steps{
                 dir('auth-service'){
