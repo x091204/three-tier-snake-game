@@ -9,6 +9,9 @@ pipeline {
         TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         REPORTS_DIR = "${WORKSPACE}/reports"
     }
+    parameters {
+    string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+    }
 
     stages{
         stage('cleaning workspace'){
@@ -18,7 +21,7 @@ pipeline {
         }
         stage('cloning repo'){
             steps{
-                git branch: 'new-model', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
+                git branch: "${params.BRANCH}", changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
             }
         }
         stage('sonarqube analysis'){
@@ -38,7 +41,7 @@ pipeline {
         stage('code quality analysis') {
 	        steps{
 		        script{
-		            waitForQualityGate abortPipeline: false, CredentialsIs: 'sonarqube'
+		            waitForQualityGate abortPipeline: false, credentialsId: 'sonarqube'
 		        }
 	        }
         }
