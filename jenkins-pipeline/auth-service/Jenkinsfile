@@ -52,7 +52,6 @@ pipeline {
                 --cache-dir ${TRIVY_CACHE_DIR} \
                 --severity HIGH,CRITICAL \
                 --ignore-unfixed \
-                --ignorefile .trivyignore \
                 --scanners vuln \
                 --format template \
                 --template "@trivy/html.tpl" \
