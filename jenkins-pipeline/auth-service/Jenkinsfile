@@ -18,7 +18,7 @@ pipeline {
         }
         stage('cloning repo'){
             steps{
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
+                git branch: 'new-model', changelog: false, poll: false, url: 'https://github.com/x091204/three-tier-snake-game.git'
             }
         }
         stage('sonarqube analysis'){
