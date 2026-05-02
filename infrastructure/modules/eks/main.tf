@@ -3,10 +3,10 @@
 resource "aws_iam_role" "eks_cluster_role" {
   name = "${var.cluster_name}-cluster-role"
 
-  assume_role_policy = jsondecode({
-    version = "2012-10-17"
-    statement = [{
-        effect = "Allow"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+        Effect = "Allow"
         Principal = {
           Service = "eks.amazonaws.com"
         }
@@ -43,9 +43,26 @@ data "tls_certificate" "eks" {
 }
 
 resource "aws_iam_openid_connect_provider" "eks" {
-  client_id_list = [sts.amazonaws.com]
+  client_id_list = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
   url = aws_eks_cluster.eks.identity[0].oidc[0].issuer
+}
+
+## node group role
+
+resource "aws_iam_role" "eks_node_role" {
+  name = "${var.cluster_name}-node-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+    }]
+  })
 }
 
 ## Node role policies
