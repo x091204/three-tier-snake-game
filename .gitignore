@@ -24,3 +24,12 @@ dist-ssr
 *.sw?
 node_modules
 .env
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+.dockerignore
+
+*.log
