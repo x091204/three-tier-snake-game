@@ -66,5 +66,5 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 100Mi
-        storageClassName: "standard"
+            storage: {{ .Values.mongodb.storageSize }}
+        storageClassName: {{ .Values.mongodb.storageClassName }}

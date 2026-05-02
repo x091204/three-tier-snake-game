@@ -14,6 +14,8 @@ mongodb:
   image: mongo
   tag: "7.0"
   replicasCount: 1
+  storageSize: "100Mi"
+  storageClassName: "standard"
 
 auth:
   image: akifmhd/auth-service
