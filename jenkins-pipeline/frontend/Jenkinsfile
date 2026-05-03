@@ -93,8 +93,8 @@ pipeline {
                 docker push ${FULL_IMAGE}
                 """
                 }
-            }
         }
+        
     }
     post {
         always {
@@ -108,5 +108,5 @@ pipeline {
                 xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
             """
         }
-    
+    }   
 }
