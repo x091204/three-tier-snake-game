@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ECR_REGISTRY = ""
+        ECR_REGISTRY = "347751175563.dkr.ecr.ap-south-1.amazonaws.com/auth-service"
         AWS_REGION = "ap-south-1"
         SCANNER_HOME = tool 'sonar-scanner'
         IMAGE_NAME = "auth-service"
@@ -12,7 +12,7 @@ pipeline {
         REPORTS_DIR = "${WORKSPACE}/reports"
     }
     parameters {
-    string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+    string(name: 'BRANCH', defaultValue: 'new-model', description: 'Branch to build')
     }
 
     stages{
