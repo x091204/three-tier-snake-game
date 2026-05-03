@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ECR_REGISTRY = ""
+        ECR_REGISTRY = "347751175563.dkr.ecr.ap-south-1.amazonaws.com"
         AWS_REGION = "ap-south-1"
         SCANNER_HOME = tool 'sonar-scanner'
         IMAGE_NAME = "frontend"
@@ -89,10 +89,10 @@ pipeline {
                 sh """
                 aws ecr get-login-password --region ${AWS_REGION} | \
                 docker login --username AWS --password-stdin ${ECR_REGISTRY}
-
+        
                 docker push ${FULL_IMAGE}
                 """
-                }
+            }
         }
         
     }
@@ -103,9 +103,9 @@ pipeline {
         cleanWs( patterns: [[pattern: '.trivy-cache/**', type: 'EXCLUDE']])
         sh """
                 docker image prune -f
-                docker images ${IMAGE_NAME} --format "{{.Tag}}" | \
+                docker images ${ECR_REGISTRY}/${IMAGE_NAME} --format "{{.Tag}}" | \
                 sort -r | tail -n +4 | \
-                xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
+                xargs -I {} docker rmi ${ECR_REGISTRY}/${IMAGE_NAME}:{} || true
             """
         }
     }   
