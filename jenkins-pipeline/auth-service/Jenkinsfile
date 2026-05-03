@@ -2,10 +2,12 @@ pipeline {
     agent any
 
     environment {
+        ECR_REGISTRY = ""
+        AWS_REGION = "ap-south-1"
         SCANNER_HOME = tool 'sonar-scanner'
-        DOCKER_USER = "akifmhd"
-        IMAGE_NAME = "auth-service:1.0"
-        FULL_IMAGE = "${DOCKER_USER}/${IMAGE_NAME}"
+        IMAGE_NAME = "auth-service"
+        IMAGE_TAG  = "1.0.${BUILD_NUMBER}"
+        FULL_IMAGE = "${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
         TRIVY_CACHE_DIR = "${WORKSPACE}/.trivy-cache"
         REPORTS_DIR = "${WORKSPACE}/reports"
     }
@@ -85,29 +87,27 @@ pipeline {
                     }
                 }
             }
-        stage('pushing docker image'){
+        stage('pushing to ECR'){
             steps{
-            withCredentials([usernamePassword(
-                credentialsId: 'docker', 
-                passwordVariable: 'password', 
-                usernameVariable: 'username'
-                )]) {
                 sh """
-                echo $password | docker login -u $username --password-stdin
+                aws ecr get-login-password --region ${AWS_REGION} | \
+                docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
                 docker push ${FULL_IMAGE}
                 """
                 }
-            }
         }
     }
     post {
         always {
         sh "ls -la ${REPORTS_DIR}/"
         archiveArtifacts artifacts: 'reports/*', allowEmptyArchive: true
-        cleanWs( patterns: [[pattern: '.trivy_cache/**', type: 'EXCLUDE']])
+        cleanWs( patterns: [[pattern: '.trivy-cache/**', type: 'EXCLUDE']])
         sh """
                 docker image prune -f
-                docker images ${IMAGE_NAME} --format "{{.Tag}}" | sort -r | tail -n +4 | xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
+                docker images ${ECR_REGISTRY}/${IMAGE_NAME} --format "{{.Tag}}" | \
+                sort -r | tail -n +4 | \
+                xargs -I {} docker rmi ${ECR_REGISTRY}/${IMAGE_NAME}:{} || true
             """
         }
     }

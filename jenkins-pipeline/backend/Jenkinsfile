@@ -87,7 +87,7 @@ pipeline {
                 }
             }
         }
-        tage('pushing to ECR'){
+        stage('pushing to ECR'){
             steps{
                 sh """
                 aws ecr get-login-password --region ${AWS_REGION} | \
