@@ -37,6 +37,5 @@ subnets = [
   repositories = [ 
     "frontend",
     "backend",
-    "database",
     "auth-service"
 ]
