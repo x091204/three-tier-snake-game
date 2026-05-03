@@ -105,7 +105,9 @@ pipeline {
         cleanWs( patterns: [[pattern: '.trivy-cache/**', type: 'EXCLUDE']])
         sh """
                 docker image prune -f
-                docker images ${IMAGE_NAME} --format "{{.Tag}}" | sort -r | tail -n +4 | xargs -I {} docker rmi ${IMAGE_NAME}:{} || true
+                docker images ${ECR_REGISTRY}/${IMAGE_NAME} --format "{{.Tag}}" | \
+                sort -r | tail -n +4 | \
+                xargs -I {} docker rmi ${ECR_REGISTRY}/${IMAGE_NAME}:{} || true
             """
         }
     }
