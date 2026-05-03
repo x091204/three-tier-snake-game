@@ -88,14 +88,14 @@ pipeline {
                 }
             }
         stage('pushing to ECR'){
-            steps{
-                sh """
-                aws ecr get-login-password --region ${AWS_REGION} | \
-                docker login --username AWS --password-stdin ${ECR_REGISTRY}
-
-                docker push ${FULL_IMAGE}
-                """
-                }
+        steps{
+            sh """
+            aws ecr get-login-password --region ${AWS_REGION} | \
+            docker login --username AWS --password-stdin ${ECR_REGISTRY}
+        
+            docker push ${FULL_IMAGE}
+            """
+            }
         }
     }
     post {
