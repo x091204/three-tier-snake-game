@@ -15,7 +15,7 @@ mongodb:
   tag: "7.0"
   replicasCount: 1
   storageSize: "100Mi"
-  storageClassName: "standard"
+  storageClassName: "gp2"
 
 auth:
   image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/auth-service
