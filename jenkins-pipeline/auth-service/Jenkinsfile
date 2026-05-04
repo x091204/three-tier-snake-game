@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ECR_REGISTRY = "<aws.ac.id>.dkr.ecr.ap-south-1.amazonaws.com"
+        ECR_REGISTRY = "347751175563.dkr.ecr.ap-south-1.amazonaws.com"
         AWS_REGION = "ap-south-1"
         SCANNER_HOME = tool 'sonar-scanner'
         IMAGE_NAME = "auth-service"

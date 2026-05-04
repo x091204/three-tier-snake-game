@@ -1,12 +1,12 @@
 namespace: three-tier-dev
 
 frontend:
-  image: akifmhd/frontend
-  tag: "1.0.5"
+  image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/frontend
+  tag: "1.0.1"
   replicasCount: 1
 
 backend:
-  image: akifmhd/backend
+  image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/backend
   tag: "1.0.1"
   replicasCount: 1
 
@@ -18,6 +18,6 @@ mongodb:
   storageClassName: "standard"
 
 auth:
-  image: akifmhd/auth-service
-  tag: "1.0"
+  image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/auth-service
+  tag: "1.0.1"
   replicasCount: 1
