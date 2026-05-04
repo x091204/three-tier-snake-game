@@ -2,12 +2,12 @@ namespace: three-tier-dev
 
 frontend:
   image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/frontend
-  tag: "1.0.1"
+  tag: "1.0.3"
   replicasCount: 1
 
 backend:
   image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/backend
-  tag: "1.0.1"
+  tag: "1.0.4"
   replicasCount: 1
 
 mongodb:
@@ -19,5 +19,5 @@ mongodb:
 
 auth:
   image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/auth-service
-  tag: "1.0.1"
+  tag: "1.0.3"
   replicasCount: 1
