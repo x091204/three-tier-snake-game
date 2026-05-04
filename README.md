@@ -2,7 +2,7 @@
 
 A fully functional Snake Game built as a production-ready **four-tier microservices application** with JWT authentication, a complete DevSecOps CI/CD pipeline, containerized with Docker, and deployed on AWS EKS using Terraform and Helm.
 
-
+![Architecture Diagram](images/architecture.png)
 
 ## 📐 Architecture
 
