@@ -19,10 +19,57 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  mongodb-exporter:
+    container_name: mongodb-exporter
+    image: percona/mongodb_exporter:0.40
+    restart: always
+    ports:
+      - "9216:9216"
+    environment:
+      - MONGODB_URI=mongodb://root:pass@database:27017/snakegame?authSource=admin
+    networks:
+      - three-tier
+    depends_on:
+      database:
+        condition: service_healthy
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - three-tier
+    restart: unless-stopped
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    networks:
+      - three-tier
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    
     
   backend:
     container_name: backend
-    image: akifmhd/backend:1.0.1
+    image: akifmhd/backend:1.0.2
     ports:
       - "5000:5000"
     networks:
@@ -36,7 +83,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: akifmhd/frontend:1.0.1
+    image: akifmhd/frontend:1.0.3
     ports:
       - "8080:80"
     networks:
@@ -47,7 +94,7 @@ services:
   
   auth-service:
     container_name: auth-service
-    image: akifmhd/auth-service:1.0
+    image: akifmhd/auth-service:1.0.1
     ports:
       - "4000:4000"
     networks:
@@ -61,5 +108,12 @@ services:
 
 volumes:
   mongo_database:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
 networks:
   three-tier:
+    driver: bridge
