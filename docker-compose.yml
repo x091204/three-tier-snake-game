@@ -28,6 +28,10 @@ services:
       - "9216:9216"
     environment:
       - MONGODB_URI=mongodb://root:pass@database:27017/snakegame?authSource=admin
+    command:
+     - '--collector.diagnosticdata'
+     - '--collector.replicasetstatus'
+     - '--collector.topmetrics'
     networks:
       - three-tier
     depends_on:
