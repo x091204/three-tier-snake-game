@@ -4,21 +4,21 @@ kind: Kustomization
 namespace: three-tier-dev
 
 resources:
-  - k8s-manifest/namespace.yaml
-  - k8s-manifest/database/mongo-secret.yml
-  - k8s-manifest/database/mongodb-dep.yml
-  - k8s-manifest/database/mongo-svc.yml
-  - k8s-manifest/backend/backend-configmap.yml
-  - k8s-manifest/backend/backend-dep.yml
-  - k8s-manifest/backend/backend-svc.yml
-  - k8s-manifest/auth-service/auth-configmap.yml
-  - k8s-manifest/auth-service/auth-dep.yml
-  - k8s-manifest/auth-service/auth-svc.yml
-  - k8s-manifest/frontend/frontend-dep.yml
-  - k8s-manifest/frontend/frontend-svc.yml
-  - k8s-manifest/monitoring/auth-servicemonitor.yml
-  - k8s-manifest/monitoring/backend-servicemonitor.yml
-  - k8s-manifest/ingress.yml
+  - namespace.yaml
+  - database/mongo-secret.yml
+  - database/mongodb-dep.yml
+  - database/mongo-svc.yml
+  - backend/backend-configmap.yml
+  - backend/backend-dep.yml
+  - backend/backend-svc.yml
+  - auth-service/auth-configmap.yml
+  - auth-service/auth-dep.yml
+  - auth-service/auth-svc.yml
+  - frontend/frontend-dep.yml
+  - frontend/frontend-svc.yml
+  - monitoring/auth-servicemonitor.yml
+  - monitoring/backend-servicemonitor.yml
+  - ingress.yml
 
 configMapGenerator:
   - name: grafana-dashboard
