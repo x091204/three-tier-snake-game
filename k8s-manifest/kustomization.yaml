@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: three-tier-dev
+
+resources:
+  - k8s-manifest/namespace.yaml
+  - k8s-manifest/database/mongo-secret.yml
+  - k8s-manifest/database/mongodb-dep.yml
+  - k8s-manifest/database/mongo-svc.yml
+  - k8s-manifest/backend/backend-configmap.yml
+  - k8s-manifest/backend/backend-dep.yml
+  - k8s-manifest/backend/backend-svc.yml
+  - k8s-manifest/auth-service/auth-configmap.yml
+  - k8s-manifest/auth-service/auth-dep.yml
+  - k8s-manifest/auth-service/auth-svc.yml
+  - k8s-manifest/frontend/frontend-dep.yml
+  - k8s-manifest/frontend/frontend-svc.yml
+  - k8s-manifest/monitoring/auth-servicemonitor.yml
+  - k8s-manifest/monitoring/backend-servicemonitor.yml
+  - k8s-manifest/monitoring/grafana-dashboard.yml
+  - k8s-manifest/ingress.yml
