@@ -18,5 +18,15 @@ resources:
   - k8s-manifest/frontend/frontend-svc.yml
   - k8s-manifest/monitoring/auth-servicemonitor.yml
   - k8s-manifest/monitoring/backend-servicemonitor.yml
-  - k8s-manifest/monitoring/grafana-dashboard.yml
   - k8s-manifest/ingress.yml
+
+configMapGenerator:
+  - name: grafana-dashboard
+    namespace: monitoring
+    files:
+      - monitoring/grafana-dashboard.json
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "1"  
