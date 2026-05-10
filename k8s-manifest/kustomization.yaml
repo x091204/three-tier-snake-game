@@ -18,15 +18,5 @@ resources:
   - frontend/frontend-svc.yml
   - monitoring/auth-servicemonitor.yml
   - monitoring/backend-servicemonitor.yml
+  - monitoring/grafana-dashboard.yml
   - ingress.yml
-
-configMapGenerator:
-  - name: grafana-dashboard
-    namespace: monitoring
-    files:
-      - monitoring/grafana-dashboard.json
-
-generatorOptions:
-  disableNameSuffixHash: true
-  labels:
-    grafana_dashboard: "1"  
