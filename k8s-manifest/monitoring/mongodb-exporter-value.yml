@@ -1,0 +1,9 @@
+mongodb:
+ uri: "mongodb://username01:password01@mongodb-svc.three-tier-dev.svc.cluster.local:27017"
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+  additionalLabels:
+    release: monitoring

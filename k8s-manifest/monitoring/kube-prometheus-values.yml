@@ -1,0 +1,5 @@
+grafana:
+  image:
+    tag: "13.0.1"
+  adminUser: admin
+  adminPassword: admin

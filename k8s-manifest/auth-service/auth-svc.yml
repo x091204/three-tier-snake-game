@@ -3,11 +3,13 @@ kind: Service
 metadata:
   name: auth-svc
   namespace: three-tier-dev
+  labels:
+    monitoring: enabled
 spec:
   selector:
     app: auth
   ports:
-  - name: auth-svc
+  - name: http
     protocol: TCP
     port: 4000
     targetPort: 4000

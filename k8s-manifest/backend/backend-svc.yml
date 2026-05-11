@@ -3,11 +3,13 @@ kind: Service
 metadata:
   name: backend-svc
   namespace: three-tier-dev
+  labels:
+    monitoring: enabled
 spec:
   selector:
     app: backend
   ports:
-  - name: backend-svc
+  - name: http
     protocol: TCP
     port: 5000
     targetPort: 5000

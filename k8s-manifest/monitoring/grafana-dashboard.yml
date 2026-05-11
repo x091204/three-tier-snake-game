@@ -18,9 +18,6 @@ data:
             "iconColor": "rgba(0, 211, 255, 1)",
             "name": "Annotations & Alerts",
             "query": {
-              "datasource": {
-                "name": "-- Grafana --"
-              },
               "group": "grafana",
               "kind": "DataQuery",
               "spec": {},
@@ -44,14 +41,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "sum(rate(http_requests_total[60m])) by (service_name)",
+                          "expr": "http_requests_total{job=\"backend-svc\"}",
                           "legendFormat": "__auto",
                           "range": true
                         },
@@ -161,14 +155,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "sum(rate(http_requests_total{service_name=\"auth-service\"}[5m]))",
+                          "expr": "sum(rate(http_requests_total{job=\"auth-svc\"}[15m]))",
                           "legendFormat": "__auto",
                           "range": true
                         },
@@ -233,366 +224,6 @@ data:
             }
           }
         },
-        "panel-11": {
-          "kind": "Panel",
-          "spec": {
-            "data": {
-              "kind": "QueryGroup",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "PanelQuery",
-                    "spec": {
-                      "hidden": false,
-                      "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
-                        "group": "prometheus",
-                        "kind": "DataQuery",
-                        "spec": {
-                          "editorMode": "code",
-                          "expr": "mongodb_up",
-                          "legendFormat": "__auto",
-                          "range": true
-                        },
-                        "version": "v0"
-                      },
-                      "refId": "A"
-                    }
-                  }
-                ],
-                "queryOptions": {},
-                "transformations": []
-              }
-            },
-            "description": "",
-            "id": 11,
-            "links": [],
-            "title": "MongoDB Status",
-            "vizConfig": {
-              "group": "stat",
-              "kind": "VizConfig",
-              "spec": {
-                "fieldConfig": {
-                  "defaults": {
-                    "color": {
-                      "mode": "thresholds"
-                    },
-                    "thresholds": {
-                      "mode": "absolute",
-                      "steps": [
-                        {
-                          "color": "blue",
-                          "value": 0
-                        }
-                      ]
-                    }
-                  },
-                  "overrides": []
-                },
-                "options": {
-                  "colorMode": "value",
-                  "graphMode": "none",
-                  "justifyMode": "center",
-                  "orientation": "auto",
-                  "percentChangeColorMode": "standard",
-                  "reduceOptions": {
-                    "calcs": [
-                      "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                  },
-                  "showPercentChange": false,
-                  "textMode": "auto",
-                  "wideLayout": true
-                }
-              },
-              "version": "13.0.1"
-            }
-          }
-        },
-        "panel-12": {
-          "kind": "Panel",
-          "spec": {
-            "data": {
-              "kind": "QueryGroup",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "PanelQuery",
-                    "spec": {
-                      "hidden": false,
-                      "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
-                        "group": "prometheus",
-                        "kind": "DataQuery",
-                        "spec": {
-                          "editorMode": "code",
-                          "expr": "mongodb_ss_connections{conn_type=\"current\"}",
-                          "legendFormat": "connections",
-                          "range": true
-                        },
-                        "version": "v0"
-                      },
-                      "refId": "A"
-                    }
-                  }
-                ],
-                "queryOptions": {},
-                "transformations": []
-              }
-            },
-            "description": "",
-            "id": 12,
-            "links": [],
-            "title": "MongoDB Current Connections",
-            "vizConfig": {
-              "group": "stat",
-              "kind": "VizConfig",
-              "spec": {
-                "fieldConfig": {
-                  "defaults": {
-                    "color": {
-                      "mode": "thresholds"
-                    },
-                    "thresholds": {
-                      "mode": "absolute",
-                      "steps": [
-                        {
-                          "color": "semi-dark-blue",
-                          "value": 0
-                        }
-                      ]
-                    }
-                  },
-                  "overrides": []
-                },
-                "options": {
-                  "colorMode": "value",
-                  "graphMode": "none",
-                  "justifyMode": "center",
-                  "orientation": "auto",
-                  "percentChangeColorMode": "standard",
-                  "reduceOptions": {
-                    "calcs": [
-                      "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                  },
-                  "showPercentChange": false,
-                  "textMode": "auto",
-                  "wideLayout": true
-                }
-              },
-              "version": "13.0.1"
-            }
-          }
-        },
-        "panel-13": {
-          "kind": "Panel",
-          "spec": {
-            "data": {
-              "kind": "QueryGroup",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "PanelQuery",
-                    "spec": {
-                      "hidden": false,
-                      "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
-                        "group": "prometheus",
-                        "kind": "DataQuery",
-                        "spec": {
-                          "editorMode": "code",
-                          "expr": "mongodb_ss_mem_resident",
-                          "legendFormat": "memor_ usage",
-                          "range": true
-                        },
-                        "version": "v0"
-                      },
-                      "refId": "A"
-                    }
-                  }
-                ],
-                "queryOptions": {},
-                "transformations": []
-              }
-            },
-            "description": "",
-            "id": 13,
-            "links": [],
-            "title": "Memory Usage",
-            "vizConfig": {
-              "group": "timeseries",
-              "kind": "VizConfig",
-              "spec": {
-                "fieldConfig": {
-                  "defaults": {
-                    "color": {
-                      "mode": "thresholds"
-                    },
-                    "custom": {
-                      "axisBorderShow": false,
-                      "axisCenteredZero": false,
-                      "axisColorMode": "text",
-                      "axisLabel": "",
-                      "axisPlacement": "auto",
-                      "barAlignment": 0,
-                      "barWidthFactor": 0.6,
-                      "drawStyle": "line",
-                      "fillOpacity": 0,
-                      "gradientMode": "none",
-                      "hideFrom": {
-                        "legend": false,
-                        "tooltip": false,
-                        "viz": false
-                      },
-                      "insertNulls": false,
-                      "lineInterpolation": "linear",
-                      "lineWidth": 1,
-                      "pointSize": 5,
-                      "scaleDistribution": {
-                        "type": "linear"
-                      },
-                      "showPoints": "auto",
-                      "showValues": false,
-                      "spanNulls": false,
-                      "stacking": {
-                        "group": "A",
-                        "mode": "none"
-                      },
-                      "thresholdsStyle": {
-                        "mode": "off"
-                      }
-                    },
-                    "thresholds": {
-                      "mode": "absolute",
-                      "steps": [
-                        {
-                          "color": "green",
-                          "value": 0
-                        },
-                        {
-                          "color": "red",
-                          "value": 80
-                        }
-                      ]
-                    },
-                    "unit": "decmbytes"
-                  },
-                  "overrides": []
-                },
-                "options": {
-                  "annotations": {
-                    "clustering": -1,
-                    "multiLane": false
-                  },
-                  "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
-                  },
-                  "tooltip": {
-                    "hideZeros": false,
-                    "mode": "single",
-                    "sort": "none"
-                  }
-                }
-              },
-              "version": "13.0.1"
-            }
-          }
-        },
-        "panel-14": {
-          "kind": "Panel",
-          "spec": {
-            "data": {
-              "kind": "QueryGroup",
-              "spec": {
-                "queries": [
-                  {
-                    "kind": "PanelQuery",
-                    "spec": {
-                      "hidden": false,
-                      "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
-                        "group": "prometheus",
-                        "kind": "DataQuery",
-                        "spec": {
-                          "editorMode": "code",
-                          "expr": "time() - process_start_time_seconds{job=\"mongodb\"}",
-                          "legendFormat": "__auto",
-                          "range": true
-                        },
-                        "version": "v0"
-                      },
-                      "refId": "A"
-                    }
-                  }
-                ],
-                "queryOptions": {},
-                "transformations": []
-              }
-            },
-            "description": "",
-            "id": 14,
-            "links": [],
-            "title": "UP-time",
-            "vizConfig": {
-              "group": "stat",
-              "kind": "VizConfig",
-              "spec": {
-                "fieldConfig": {
-                  "defaults": {
-                    "color": {
-                      "mode": "thresholds"
-                    },
-                    "thresholds": {
-                      "mode": "absolute",
-                      "steps": [
-                        {
-                          "color": "blue",
-                          "value": 0
-                        }
-                      ]
-                    },
-                    "unit": "s"
-                  },
-                  "overrides": []
-                },
-                "options": {
-                  "colorMode": "value",
-                  "graphMode": "none",
-                  "justifyMode": "center",
-                  "orientation": "auto",
-                  "percentChangeColorMode": "standard",
-                  "reduceOptions": {
-                    "calcs": [
-                      "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                  },
-                  "showPercentChange": false,
-                  "textMode": "auto",
-                  "wideLayout": true
-                }
-              },
-              "version": "13.0.1"
-            }
-          }
-        },
         "panel-15": {
           "kind": "Panel",
           "spec": {
@@ -605,9 +236,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -724,14 +352,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "process_resident_memory_bytes{job=\"backend\"}",
+                          "expr": "process_resident_memory_bytes{job=\"backend-svc\"}",
                           "legendFormat": "backend",
                           "range": true
                         },
@@ -745,9 +370,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -865,9 +487,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -983,9 +602,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1004,9 +620,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1027,9 +640,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1049,9 +659,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1071,9 +678,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1191,14 +795,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "sum(http_requests_in_progress) by (service_name)",
+                          "expr": "sum(http_requests_in_progress) by (job)",
                           "legendFormat": "__auto",
                           "range": true
                         },
@@ -1271,9 +872,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1352,14 +950,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "histogram_quantile(0.95,sum(rate(http_request_duration_seconds_bucket{service_name=\"backend\"}[5m])) by (le))",
+                          "expr": "histogram_quantile(0.95,sum(rate(http_request_duration_seconds_bucket{service_name=\"backend-svc\"}[5m])) by (le))",
                           "legendFormat": "p95",
                           "range": true
                         },
@@ -1373,9 +968,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1395,9 +987,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1417,9 +1006,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1439,9 +1025,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1559,14 +1142,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "sum(rate(http_requests_total{job=\"backend\",status_code=~\"4..|5..\"}[5m]))",
+                          "expr": "sum(rate(http_requests_total{job=\"backend-svc\",status_code=~\"4..|5..\"}[5m]))",
                           "legendFormat": "err rate",
                           "range": true
                         },
@@ -1677,14 +1257,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "histogram_quantile(0.95,sum(rate(http_request_duration_seconds_bucket{service_name=\"backend\"}[5m])) by (le))",
+                          "expr": "histogram_quantile(0.95,sum(rate(http_request_duration_seconds_bucket{service_name=\"auth-svc\"}[5m])) by (le))",
                           "legendFormat": "p95",
                           "range": true
                         },
@@ -1698,9 +1275,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1720,9 +1294,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1742,9 +1313,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1764,9 +1332,6 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
@@ -1880,14 +1445,11 @@ data:
                     "spec": {
                       "hidden": false,
                       "query": {
-                        "datasource": {
-                          "name": "fflbv4zzvn11ce"
-                        },
                         "group": "prometheus",
                         "kind": "DataQuery",
                         "spec": {
                           "editorMode": "code",
-                          "expr": "sum(rate(http_requests_total{service_name=\"auth-service\",status_code=~\"4..|5..\"}[5m]))",
+                          "expr": "sum(rate(http_requests_total{job=\"auth-svc\",status_code=~\"4..|5..\"}[5m]))",
                           "legendFormat": "err rate",
                           "range": true
                         },
@@ -1957,7 +1519,7 @@ data:
                         }
                       ]
                     },
-                    "unit": "s"
+                    "unit": "none"
                   },
                   "overrides": []
                 },
@@ -2184,72 +1746,6 @@ data:
                   }
                 },
                 "title": "Auth-service"
-              }
-            },
-            {
-              "kind": "RowsLayoutRow",
-              "spec": {
-                "collapse": false,
-                "layout": {
-                  "kind": "GridLayout",
-                  "spec": {
-                    "items": [
-                      {
-                        "kind": "GridLayoutItem",
-                        "spec": {
-                          "element": {
-                            "kind": "ElementReference",
-                            "name": "panel-12"
-                          },
-                          "height": 6,
-                          "width": 4,
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      {
-                        "kind": "GridLayoutItem",
-                        "spec": {
-                          "element": {
-                            "kind": "ElementReference",
-                            "name": "panel-11"
-                          },
-                          "height": 6,
-                          "width": 4,
-                          "x": 4,
-                          "y": 0
-                        }
-                      },
-                      {
-                        "kind": "GridLayoutItem",
-                        "spec": {
-                          "element": {
-                            "kind": "ElementReference",
-                            "name": "panel-14"
-                          },
-                          "height": 6,
-                          "width": 16,
-                          "x": 8,
-                          "y": 0
-                        }
-                      },
-                      {
-                        "kind": "GridLayoutItem",
-                        "spec": {
-                          "element": {
-                            "kind": "ElementReference",
-                            "name": "panel-13"
-                          },
-                          "height": 8,
-                          "width": 24,
-                          "x": 0,
-                          "y": 6
-                        }
-                      }
-                    ]
-                  }
-                },
-                "title": "Database"
               }
             }
           ]

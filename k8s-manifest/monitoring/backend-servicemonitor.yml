@@ -6,13 +6,14 @@ metadata:
   labels:
     release: monitoring
 spec:
-  selector:
-    matchLabels:
-      app: backend
   namespaceSelector:
     matchNames:
       - three-tier-dev
+  selector:
+    matchLabels:
+      monitoring: enabled
+
   endpoints:
-  - port: http
-    path: /metrics
-    interval: 15s
+    - port: http
+      path: /metrics
+      interval: 15s
