@@ -1,17 +1,17 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ .Release.Name }}-backend-monitor
+  name: auth-monitor
   namespace: monitoring
   labels:
-    release: monitoring
+    release: kube-prometheus-stack
 spec:
   namespaceSelector:
     matchNames:
       - three-tier-dev
   selector:
     matchLabels:
-      monitoring: enabled
+      app: auth
 
   endpoints:
     - port: http

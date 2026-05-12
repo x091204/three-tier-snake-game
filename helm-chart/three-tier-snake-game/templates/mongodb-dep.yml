@@ -47,6 +47,7 @@ spec:
               - "db.adminCommand('ping')"
           initialDelaySeconds: 30
           periodSeconds: 10
+          timeoutSeconds: 10
         livenessProbe:
           exec:
             command:
@@ -54,7 +55,8 @@ spec:
               - --eval
               - "db.adminCommand('ping')"
           initialDelaySeconds: 60
-          periodSeconds: 15
+          periodSeconds: 30
+          timeoutSeconds: 10
           failureThreshold: 5
         volumeMounts:
         - name: mongodb-volume-claim
