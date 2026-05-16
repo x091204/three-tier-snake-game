@@ -1,49 +1,56 @@
 # 🐍 Three-Tier Snake Game
 
-A fully functional Snake Game built as a production-ready **four-tier microservices application** with JWT authentication, a complete DevSecOps CI/CD pipeline, containerized with Docker, and deployed on AWS EKS using Terraform and Helm.
+A fully functional Snake Game built as a production-ready **three-tier microservices application** with JWT authentication, a complete DevSecOps CI/CD pipeline, containerized with Docker, and deployed on AWS EKS using Terraform and Helm. Includes full observability with Prometheus and Grafana.
 
-![Architecture Diagram](z-documentation/images/architecture.png)
+---
 
 ## 📐 Architecture
 
 ```
                         ┌──────────────────────────────────────────────────┐
-                        │              AWS EKS Cluster                     │
-                        │              Namespace: three-tier-dev           │
-                        │                                                  │
+                        │              AWS EKS Cluster                      │
+                        │              Namespace: three-tier-dev            │
+                        │                                                   │
                         │   ┌─────────────────────────┐                    │
-  Browser               │   │      Ingress (Nginx)    │                    │
-  ──────────────────────┼──►│                         │                    │
-                        │   └────────────┬────────────┘                    │
-                        │                │                                 │
-                        │   /       /api        /auth                      │
-                        │   ▼         ▼            ▼                       │
-                        │  frontend  backend    auth-svc                   │
-                        │  :80       :5000       :4000                     │
-                        │  (Nginx)   (Node.js)  (Node.js)                  │
-                        │                │            │                    │
+  Browser               │   │      Ingress (Nginx)     │                   │
+  ──────────────────────┼──►│  snake-game.com          │                   │
+                        │   └──────┬──────┬────────────┘                   │
+                        │          │      │       │                         │
+                        │    /     │  /api│  /auth│                         │
+                        │    ▼        ▼       ▼                             │
+                        │  frontend  backend  auth-svc                     │
+                        │  :80       :5000    :4000                         │
+                        │                │        │                         │
                         │           mongodb-svc (Headless)                 │
-                        │                │                                 │
+                        │                │                                  │
                         │           MongoDB (StatefulSet)                  │
-                        │                │                                 │
+                        │                │                                  │
                         │            PVC gp2 (100Mi)                       │
+                        │                                                   │
+                        │   ┌─────────────────────────┐                    │
+                        │   │  Namespace: monitoring   │                    │
+                        │   │  Prometheus + Grafana    │                    │
+                        │   │  kube-prometheus-stack   │                    │
+                        │   └─────────────────────────┘                    │
                         └──────────────────────────────────────────────────┘
+
+Cluster: provisioned by Terraform — VPC, EKS, node groups, IAM, OIDC, ECR
 ```
 
-
+---
 
 ## 🔄 CI/CD Pipeline
 
-Three independent Jenkins pipelines — one for each custom image. Images are pushed to AWS ECR.
+Three independent Jenkins pipelines — frontend, backend, auth-service.
 
 ```
-GitHub Push (branch selectable)
+GitHub Push (branch selectable via parameter)
          │
          ▼
 Clean Workspace → Clone Repo → SonarQube Analysis → Quality Gate
          │
          ▼
-Build Docker Image → Trivy Scan (report + gate) → Push to ECR
+Build Docker Image → Trivy Scan (HTML report + gate) → Push to AWS ECR
 ```
 
 | Stage | What it does |
@@ -53,34 +60,32 @@ Build Docker Image → Trivy Scan (report + gate) → Push to ECR
 | SonarQube analysis | Scans source code for bugs and vulnerabilities |
 | Quality gate | Waits for SonarQube result — marks unstable if failed |
 | Build Docker image | Builds image from Dockerfile |
-| Trivy scan | Generates HTML report then gates on HIGH/CRITICAL CVEs |
-| Push to ECR | Authenticates via IAM role and pushes to AWS ECR |
-| Post actions | Archives Trivy report, prunes old images, cleans workspace |
+| Trivy scan | Generates HTML report (exit 0) then gates on HIGH/CRITICAL (exit 1) |
+| Push to ECR | Authenticates via IAM role — no hardcoded credentials |
+| Post | Archives Trivy report, prunes old images, cleans workspace |
 
-### Jenkins setup requirements
+**Image tag format:** `1.0.BUILD_NUMBER`
 
-| Requirement | Details |
-|------------|---------|
-| IAM Role on Jenkins EC2 | `AmazonEC2ContainerRegistryFullAccess`, `AmazonEKSClusterPolicy`, `AmazonEKSWorkerNodePolicy` |
-| Jenkins credential | `sonarqube` — SonarQube token as Secret text |
-| SonarQube server | Name: `sonar-server`, URL: `http://SONARQUBE_IP:9000` |
-| SonarQube scanner tool | Name: `sonar-scanner` |
-| SonarQube webhook | `http://JENKINS_IP:8080/sonarqube-webhook/` |
+**Jenkins EC2 IAM policies required:**
+- `AmazonEC2ContainerRegistryFullAccess`
+- `AmazonEKSClusterPolicy`
+- `AmazonEKSWorkerNodePolicy`
+- Custom inline: `eks:DescribeCluster`, `eks:ListClusters`, `eks:AccessKubernetesApi`
 
-
+---
 
 ## 🎮 What the App Does
 
 - Snake game on a 20×20 grid controlled with arrow keys
 - Register and login with a username and password
 - Score increases by 10 points per food eaten
-- Score automatically saved to MongoDB with your username when the game ends
+- Score automatically saved to MongoDB with your username on game over
 - Leaderboard shows top 10 highest scores with player names
 - Leaderboard refreshes automatically after every game
 - About page with project info, tech stack, and author details
 - Session persists on page refresh via sessionStorage
 
-
+---
 
 ## 🗂️ Project Structure
 
@@ -89,51 +94,34 @@ three-tier-snake-game/
 │
 ├── frontend/                           # React + Vite
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── GameBoard.jsx           # Game grid renderer
-│   │   │   ├── GameBoard.module.css
-│   │   │   ├── Scoreboard.jsx          # Top 10 leaderboard
-│   │   │   └── Scoreboard.module.css
-│   │   ├── context/
-│   │   │   └── AuthContext.jsx         # JWT auth state (sessionStorage)
-│   │   ├── hooks/
-│   │   │   └── useGame.js              # All snake game logic
-│   │   ├── pages/
-│   │   │   ├── Login.jsx
-│   │   │   ├── Register.jsx
-│   │   │   ├── GamePage.jsx
-│   │   │   ├── GamePage.module.css
-│   │   │   ├── About.jsx
-│   │   │   ├── About.module.css
-│   │   │   └── Auth.module.css
-│   │   ├── App.jsx                     # Routes and protected routes
-│   │   ├── api.js                      # All HTTP calls
-│   │   ├── index.css                   # Global styles (Inter + Press Start 2P)
-│   │   └── main.jsx
-│   ├── nginx.conf                      # Custom Nginx with gzip, caching, security headers
-│   ├── .env.development                # Local dev
-│   ├── .env.docker                     # Docker Compose
-│   ├── .env.production                 # Kubernetes / EKS
-│   └── Dockerfile                      # Multi-stage: Node build → Nginx serve
+│   │   ├── components/                 # GameBoard, Scoreboard
+│   │   ├── context/AuthContext.jsx     # JWT auth state (sessionStorage)
+│   │   ├── hooks/useGame.js            # All snake game logic
+│   │   ├── pages/                      # Login, Register, GamePage, About
+│   │   ├── App.jsx                     # Routes + protected routes
+│   │   └── api.js                      # All HTTP calls
+│   ├── nginx.conf                      # Gzip, caching, security headers
+│   ├── .env.development
+│   ├── .env.docker                     # For Docker Compose builds
+│   ├── .env.production                 # For Kubernetes builds (/api, /auth)
+│   └── Dockerfile                      # Multi-stage: Node build → Nginx
 │
-├── backend/                            # Node.js + Express API
+├── backend/                            # Node.js + Express
 │   ├── src/
-│   │   ├── config/db.js                # MongoDB connection
-│   │   ├── middleware/auth.js          # JWT verification middleware
-│   │   ├── models/Score.js             # Score schema (score + username + userId)
-│   │   ├── routes/scores.js            # POST (auth required) and GET endpoints
-│   │   └── server.js                   # Express entry point + /health
-│   ├── .env                            # Local dev only
-│   ├── .env.docker                     # Docker Compose
+│   │   ├── config/db.js
+│   │   ├── middleware/auth.js          # JWT verification
+│   │   ├── models/Score.js             # score + username + userId
+│   │   ├── routes/scores.js            # POST (auth) and GET
+│   │   └── server.js                   # /health + /metrics (prom-client)
+│   ├── .env.docker
 │   ├── .trivyignore
 │   └── Dockerfile
 │
 ├── auth-service/                       # JWT Auth Microservice
 │   ├── src/
-│   │   ├── config/db.js
-│   │   ├── models/User.js              # User schema (username + bcrypt password)
-│   │   ├── routes/auth.js              # /register /login /verify + /health
-│   │   └── server.js
+│   │   ├── models/User.js              # username + bcrypt password
+│   │   ├── routes/auth.js              # /register /login /verify /health
+│   │   └── server.js                   # /metrics (prom-client)
 │   ├── .env.docker
 │   ├── .trivyignore
 │   └── Dockerfile
@@ -141,7 +129,7 @@ three-tier-snake-game/
 ├── helm-chart/                         # Helm chart
 │   └── three-tier-snake-game/
 │       ├── Chart.yaml
-│       ├── values.yaml                 # Images from ECR, storageClass gp2
+│       ├── values.yaml                 # ECR images, gp2 storage, tags
 │       └── templates/
 │           ├── frontend-dep.yml
 │           ├── frontend-svc.yml
@@ -152,49 +140,60 @@ three-tier-snake-game/
 │           ├── auth-svc.yml
 │           ├── auth-configmap.yml
 │           ├── mongodb-dep.yml         # StatefulSet
-│           ├── mongo-svc.yml           # Headless service
+│           ├── mongo-svc.yml           # Headless
 │           ├── mongo-secret.yml
 │           └── ingress.yml
 │
-├── k8s-manifest/                       # Raw Kubernetes manifests (Kind/local)
+├── k8s-manifest/                       # Raw manifests + Kustomize
+│   ├── kustomization.yaml              # Apply everything with one command
 │   ├── namespace.yml
 │   ├── ingress.yml
 │   ├── frontend/
 │   ├── backend/
 │   ├── auth-service/
-│   └── database/
+│   ├── database/
+│   └── monitoring/
+│       ├── backend-servicemonitor.yml
+│       ├── auth-servicemonitor.yml
+│       └── grafana-dashboard.yml       # Custom dashboard ConfigMap
 │
-├── infrastructure/                     # Terraform — AWS EKS infrastructure
+├── infrastructure/                     # Terraform
 │   ├── main.tf                         # Module calls
 │   ├── variables.tf
 │   ├── output.tf
-│   ├── provider.tf                     # AWS provider
-│   ├── terraform.tfvars                # Your values
+│   ├── provider.tf                     # AWS + Helm + Kubernetes providers
+│   ├── monitoring.tf                   # kube-prometheus-stack Helm release
+│   ├── terraform.tfvars
 │   └── modules/
 │       ├── vpc/                        # VPC, subnets, IGW, routes
-│       ├── eks/                        # EKS cluster, node group, IAM roles, OIDC
-│       └── ecr/                        # ECR repositories
+│       ├── eks/                        # EKS cluster, node group, IAM, OIDC
+│       ├── ecr/                        # ECR repositories
+│       └── monitoring/                 # kube-prometheus-stack
 │
 ├── jenkins-pipeline/                   # Jenkinsfiles
 │   ├── frontend/Jenkinsfile
 │   ├── backend/Jenkinsfile
 │   └── auth-service/Jenkinsfile
 │
-├── docker-compose.yml                  # Local four-container setup
+├── monitoring/                         # Local monitoring config
+│   ├── prometheus/prometheus.yml       # Scrape configs
+│   └── grafana/provisioning/          # Grafana datasource + dashboard
+│
+├── docker-compose.yml                  # Full local stack with monitoring
 └── z-documentation/
-    └── three-tier-snake-game-docs.docx
 ```
 
-
+---
 
 ## ⚙️ Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 18, Vite, React Router, Axios, Nginx |
-| Backend | Node.js, Express, Mongoose, JWT, dotenv |
-| Auth Service | Node.js, Express, bcryptjs, JWT, Mongoose |
+| Backend | Node.js, Express, Mongoose, JWT, prom-client |
+| Auth Service | Node.js, Express, bcryptjs, JWT, prom-client |
 | Database | MongoDB 7.0 |
+| Monitoring | Prometheus, Grafana, mongodb-exporter, prom-client |
 | CI/CD | Jenkins, SonarQube, Trivy |
 | Image Registry | AWS ECR |
 | Container | Docker |
@@ -202,110 +201,101 @@ three-tier-snake-game/
 | Package Manager | Helm |
 | Infrastructure | Terraform |
 | Ingress | Nginx Ingress Controller |
-| Persistence | EBS PVC via StatefulSet (gp2, 100Mi) |
+| Persistence | EBS gp2 PVC via StatefulSet (100Mi) |
 
+---
 
+## 📊 Observability
+
+### Metrics exposed
+
+Both backend and auth-service expose `/metrics` using `prom-client`:
+- Default Node.js metrics (CPU, memory, event loop lag, heap)
+- Custom HTTP metrics (request rate, error rate, latency histograms, active requests)
+- Custom app metrics (scores saved, login attempts by status)
+
+### Grafana dashboard panels
+
+| Row | Panels |
+|-----|--------|
+| Overview | Request/sec, Error rate, Latency (p50/p75/p95/p99), Active requests, CPU, Memory |
+| Backend | Request rate, Latency, Error rate |
+| Auth Service | Request rate, Latency, Error rate |
+| Database | MongoDB status, Current connections, Memory usage, Uptime |
+
+### Local monitoring (Docker Compose)
+
+```bash
+docker compose up -d
+```
+
+| Service | URL |
+|---------|-----|
+| Grafana | http://localhost:3000 (admin/admin) |
+| Prometheus | http://localhost:9090 |
+| MongoDB Exporter | http://localhost:9216/metrics |
+
+### Kubernetes monitoring
+
+Prometheus and Grafana are installed via Terraform using `kube-prometheus-stack`. ServiceMonitors scrape backend and auth-service automatically via label `monitoring: enabled`.
+
+Apply custom dashboards and ServiceMonitors:
+```bash
+kubectl apply -k k8s-manifest/
+```
+
+---
 
 ## ☁️ Infrastructure — Terraform
 
-Terraform provisions the full AWS infrastructure before deploying the app.
-
-### What it creates
+### What it provisions
 
 | Resource | Details |
 |---------|---------|
-| VPC | Custom VPC with CIDR `10.1.0.0/16` |
-| Subnets | 3 subnets across `ap-south-1a`, `ap-south-1b`, `ap-south-1c` |
-| EKS Cluster | Managed Kubernetes cluster |
-| Node Group | `m7i-flex.large`, ON_DEMAND, min 1 / desired 1 / max 2, 30GB disk |
-| IAM Roles | Cluster role + node group role with required policies |
+| VPC | `10.1.0.0/16` across 3 AZs (ap-south-1a/b/c) |
+| EKS Cluster | Managed Kubernetes |
+| Node Group | `m7i-flex.large`, ON_DEMAND, min 1 / desired 1 / max 2, 30GB |
+| IAM Roles | Cluster role + node group role |
 | OIDC Provider | For IRSA (IAM Roles for Service Accounts) |
-| EBS CSI Driver | For PersistentVolumeClaim support on EKS |
+| EBS CSI Driver | For PVC support with gp2 storage |
 | ECR Repositories | `frontend`, `backend`, `auth-service` |
+| kube-prometheus-stack | Prometheus + Grafana + Alertmanager (Helm) |
 
-### How to use
+### Usage
 
 ```bash
 cd infrastructure
-
-# Initialise
 terraform init
-
-# Review what will be created
 terraform plan
-
-# Create infrastructure (~10-15 minutes)
-terraform apply
-
-# Destroy when done (to avoid charges)
-terraform destroy
+terraform apply    # ~15 minutes
+terraform destroy  # when done — saves AWS credits
 ```
 
-### Configure `terraform.tfvars` before applying
+### `terraform.tfvars`
 
 ```hcl
-region            = "ap-south-1"
-vpc_name          = "EKS-demo-vpc"
-vpc_cidr          = "10.1.0.0/16"
-cluster_name      = "eks_cluster"
-node_group_name   = "eks-node-group"
-instance_type     = ["m7i-flex.large"]
-capacity_type     = "ON_DEMAND"
-desired_size      = 1
-min_size          = 1
-max_size          = 2
-disk_size         = 30
-repositories      = ["frontend", "backend", "auth-service"]
+region          = "ap-south-1"
+vpc_name        = "EKS-demo-vpc"
+vpc_cidr        = "10.1.0.0/16"
+cluster_name    = "eks_cluster"
+node_group_name = "eks-node-group"
+instance_type   = ["m7i-flex.large"]
+capacity_type   = "ON_DEMAND"
+desired_size    = 1
+min_size        = 1
+max_size        = 2
+disk_size       = 30
+repositories    = ["frontend", "backend", "auth-service"]
 ```
 
-
+---
 
 ## 🚀 Running Locally
 
-### Option 1 — Manual (four terminals)
+### Option 1 — Docker Compose (with monitoring)
 
 ```bash
-# Terminal 1 — MongoDB
-sudo systemctl start mongod
-
-# Terminal 2 — Auth service
-cd auth-service && npm install && npm run dev   # port 4000
-
-# Terminal 3 — Backend
-cd backend && npm install && npm run dev         # port 5000
-
-# Terminal 4 — Frontend
-cd frontend && npm install && npm run dev         # port 5173
-```
-
-**Environment files needed:**
-
-`auth-service/.env`
-```
-MONGO_URI=mongodb://localhost:27017/snakegame
-JWT_SECRET=your_secret_here
-PORT=4000
-```
-
-`backend/.env`
-```
-MONGO_URI=mongodb://localhost:27017/snakegame
-JWT_SECRET=your_secret_here
-PORT=5000
-```
-
-`frontend/.env.development`
-```
-VITE_API_URL=http://YOUR_IP:5000/api
-VITE_AUTH_URL=http://YOUR_IP:4000
-```
-
-
-
-### Option 2 — Docker Compose
-
-```bash
-docker compose up
+docker compose up -d
 ```
 
 | Service | URL |
@@ -313,60 +303,85 @@ docker compose up
 | Frontend | http://localhost:8080 |
 | Backend | http://localhost:5000 |
 | Auth Service | http://localhost:4000 |
-| MongoDB | localhost:27017 |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
 
-> Requires `backend/.env.docker` and `auth-service/.env.docker` to exist.
+Requires `backend/.env.docker` and `auth-service/.env.docker`.
 
-
-
-## ☸️ Kubernetes Deployment
-
-### Option 1 — EKS (Production)
-
-**Prerequisites:** Terraform applied, AWS CLI configured, kubectl installed, Helm installed
-
-```bash
-# Connect kubectl to EKS
-aws eks update-kubeconfig --name eks_cluster --region ap-south-1
-
-# Install Nginx Ingress Controller
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/aws/deploy.yaml
-
-# Deploy with Helm
-helm install snake-game ./helm-chart/three-tier-snake-game \
-  --namespace three-tier-dev \
-  --create-namespace
-
-# Get app URL
-kubectl get ingress -n three-tier-dev
-```
-
-> Update `ECR_REGISTRY` in all Jenkinsfiles with your AWS account ID before running pipelines.
-
-
-
-### Option 2 — Kind (Local)
+### Option 2 — Kind cluster (local Kubernetes)
 
 ```bash
 # Create cluster
 kind create cluster --config k8s-manifest/cluster.yml --name three-tier
 
-# Install Nginx Ingress Controller
+# Install Nginx Ingress
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
-# Apply manifests
-kubectl apply -f k8s-manifest/namespace.yml
-kubectl apply -f k8s-manifest/database/
-kubectl apply -f k8s-manifest/backend/
-kubectl apply -f k8s-manifest/auth-service/
-kubectl apply -f k8s-manifest/frontend/
-kubectl apply -f k8s-manifest/ingress.yml
+# Start cloud-provider-kind for external IP (separate terminal)
+sudo cloud-provider-kind
 
-# Add to /etc/hosts
-echo "127.0.0.1 snake-game.com" | sudo tee -a /etc/hosts
+# Get external IP and update /etc/hosts
+EXTERNAL_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo "$EXTERNAL_IP snake-game.com" | sudo tee -a /etc/hosts
+
+# Apply all manifests with Kustomize
+kubectl apply -k k8s-manifest/
+
+# Access
+http://snake-game.com
 ```
 
+---
 
+## ☸️ Kubernetes Deployment — EKS
+
+### Prerequisites
+
+- Terraform applied (`terraform apply`)
+- AWS CLI configured
+- kubectl and Helm installed
+
+### Connect kubectl
+
+```bash
+aws eks update-kubeconfig --name eks_cluster --region ap-south-1
+```
+
+### Install Nginx Ingress Controller
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/aws/deploy.yaml
+```
+
+### Deploy with Helm
+
+```bash
+helm install snake-game ./helm-chart/three-tier-snake-game \
+  --namespace three-tier-dev \
+  --create-namespace
+```
+
+### Apply monitoring manifests
+
+```bash
+kubectl apply -k k8s-manifest/
+```
+
+### Get app URL
+
+```bash
+kubectl get ingress -n three-tier-dev
+```
+
+### Access Grafana
+
+```bash
+kubectl port-forward svc/kube-prometheus-stack-grafana 3000:80 -n monitoring
+# http://localhost:3000 — admin / prom-operator
+```
+
+---
 
 ## 🎯 Helm Reference
 
@@ -374,14 +389,13 @@ echo "127.0.0.1 snake-game.com" | sudo tee -a /etc/hosts
 # Install
 helm install snake-game ./helm-chart/three-tier-snake-game
 
-# Upgrade with new image tag
+# Upgrade with new image
 helm upgrade snake-game ./helm-chart/three-tier-snake-game \
-  --set frontend.tag=1.0.5
+  --set backend.tag=1.0.5
 
 # Change storage class (Kind vs EKS)
-helm install snake-game ./helm-chart/three-tier-snake-game \
-  --set mongodb.storageClassName=gp2    # EKS
-  --set mongodb.storageClassName=standard  # Kind
+--set mongodb.storageClassName=standard   # Kind
+--set mongodb.storageClassName=gp2        # EKS
 
 # Rollback
 helm rollback snake-game 1
@@ -390,7 +404,7 @@ helm rollback snake-game 1
 helm uninstall snake-game
 ```
 
-
+---
 
 ## 📡 API Reference
 
@@ -398,55 +412,58 @@ helm uninstall snake-game
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/health` | No | Kubernetes liveness probe |
-| POST | `/api/scores` | JWT | Save score after game over |
-| GET | `/api/scores` | No | Get top 10 scores |
+| GET | `/health` | No | Liveness probe |
+| GET | `/metrics` | No | Prometheus metrics |
+| POST | `/api/scores` | JWT | Save score |
+| GET | `/api/scores` | No | Top 10 scores |
 
 ### Auth Service
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| GET | `/health` | No | Kubernetes liveness probe |
+| GET | `/health` | No | Liveness probe |
+| GET | `/metrics` | No | Prometheus metrics |
 | POST | `/auth/register` | No | Create account |
-| POST | `/auth/login` | No | Login — returns JWT token |
+| POST | `/auth/login` | No | Login — returns JWT |
 | GET | `/auth/verify` | JWT | Verify token |
 
+---
 
-
-## 🔐 How JWT Auth Works
+## 🔐 JWT Auth Flow
 
 ```
-Register/Login → Auth Service → MongoDB (users collection)
+Register/Login → Auth Service → MongoDB (users)
                              ← JWT token (7 day expiry)
 
-Save Score → Backend (validates JWT using shared JWT_SECRET)
-                    → Extracts username from token payload
-                    → Saves score + username to MongoDB
+Save Score → Backend validates JWT using shared JWT_SECRET
+           → Extracts username from token payload
+           → Saves score + username to MongoDB
 
 Backend never calls Auth Service again after login.
-JWT_SECRET must be identical in both services.
+JWT_SECRET must be identical in both services — stored in mongo-sec Secret.
 ```
 
-
+---
 
 ## 🗄️ Database
 
-- **Database:** `snakegame`
-- **Credentials:** Kubernetes Secret (`mongo-sec`)
+- **Name:** `snakegame`
 - **Storage:** EBS gp2 PVC (100Mi) via StatefulSet volumeClaimTemplates
+- **Credentials:** Kubernetes Secret `mongo-sec`
 
 | Collection | Fields |
 |-----------|--------|
 | `scores` | score, username, userId, createdAt |
-| `users` | username, password (bcrypt), createdAt |
+| `users` | username, password (bcrypt 10 rounds), createdAt |
 
-
+---
 
 ## 🔧 Kubernetes Resources
 
 | Resource | Name | Details |
 |----------|------|---------|
-| Namespace | `three-tier-dev` | Isolates all resources |
+| Namespace | `three-tier-dev` | App resources |
+| Namespace | `monitoring` | Prometheus + Grafana |
 | Deployment | `frontend-deployment` | Nginx + React |
 | Deployment | `backend-dep` | Node.js API |
 | Deployment | `auth-dep` | Auth microservice |
@@ -459,9 +476,12 @@ JWT_SECRET must be identical in both services.
 | ConfigMap | `auth-config` | MONGO_URI, PORT |
 | Secret | `mongo-sec` | MongoDB credentials + JWT_SECRET |
 | PVC | `mongodb-volume-claim` | Auto-created by StatefulSet |
-| Ingress | `ingress` | `/` → frontend, `/api` → backend, `/auth` → auth |
+| Ingress | `ingress` | / → frontend, /api → backend, /auth → auth |
+| ServiceMonitor | `backend-monitor` | Prometheus scrape config |
+| ServiceMonitor | `auth-monitor` | Prometheus scrape config |
+| ConfigMap | `grafana-dashboard` | Custom dashboard JSON |
 
-
+---
 
 ## 🛡️ Security
 
@@ -469,27 +489,28 @@ JWT_SECRET must be identical in both services.
 |---------|-----------|
 | SonarQube analysis + quality gate | All three pipelines |
 | Trivy image scanning HIGH/CRITICAL | All three pipelines |
+| `.trivyignore` with documented CVEs | Backend, Auth service |
 | bcrypt password hashing (10 rounds) | Auth service |
-| JWT token authentication (7d expiry) | Auth + Backend |
+| JWT token auth (7d expiry) | Auth + Backend |
 | `seccompProfile: RuntimeDefault` | All pods |
 | `allowPrivilegeEscalation: false` | All containers |
 | `privileged: false` | All containers |
 | Credentials via Kubernetes Secret | MongoDB + JWT |
-| IAM role on Jenkins EC2 (no hardcoded keys) | Jenkins server |
-| `.trivyignore` with documented justifications | Backend, Auth service |
+| IAM role on Jenkins EC2 | No hardcoded AWS keys |
+| ECR for image storage | No Docker Hub in production |
 
-
+---
 
 ## 📊 Resource Limits
 
-| Tier | Memory Request | Memory Limit | CPU Request | CPU Limit |
-|------|---------------|-------------|-------------|-----------|
+| Tier | Mem Request | Mem Limit | CPU Request | CPU Limit |
+|------|------------|-----------|-------------|-----------|
 | Frontend | 100Mi | 100Mi | 100m | 200m |
 | Backend | 250Mi | 250Mi | 300m | 500m |
 | Auth Service | 250Mi | 250Mi | 300m | 500m |
 | MongoDB | 256Mi | 512Mi | 250m | 500m |
 
-
+---
 
 ## 🔍 Health Checks
 
@@ -500,13 +521,14 @@ JWT_SECRET must be identical in both services.
 | Auth Service | HTTP GET | `/health` port 4000 | 10s | 15s |
 | MongoDB | exec mongosh ping | — | 30s (5 retries) | 60s |
 
-
+---
 
 ## 🛑 Useful Commands
 
 ```bash
-# Check pods
-kubectl get pods -n three-tier-dev -o wide
+# Check everything
+kubectl get all -n three-tier-dev
+kubectl get all -n monitoring
 
 # Stream logs
 kubectl logs -f deployment/backend-dep -n three-tier-dev
@@ -514,21 +536,30 @@ kubectl logs -f deployment/auth-dep -n three-tier-dev
 kubectl logs -f statefulset/mongodb-deployment -n three-tier-dev
 
 # Restart deployment
-kubectl rollout restart deployment/auth-dep -n three-tier-dev
+kubectl rollout restart deployment/backend-dep -n three-tier-dev
+
+# Apply with Kustomize
+kubectl apply -k k8s-manifest/
 
 # Helm status
 helm status snake-game
 helm history snake-game
 
-# Delete everything
+# Port forward Grafana
+kubectl port-forward svc/kube-prometheus-stack-grafana 3000:80 -n monitoring
+
+# Port forward Prometheus
+kubectl port-forward svc/kube-prometheus-stack-prometheus 9090:9090 -n monitoring
+
+# Delete app
 helm uninstall snake-game
 kubectl delete namespace three-tier-dev
 
-# Terraform destroy (save AWS credits)
+# Destroy AWS infra (save credits)
 cd infrastructure && terraform destroy
 ```
 
-
+---
 
 ## 🔧 Common Modifications
 
@@ -539,12 +570,12 @@ cd infrastructure && terraform destroy
 | Game speed | `frontend/src/hooks/useGame.js` | `const SPEED = 150` |
 | Grid size | `frontend/src/hooks/useGame.js` | `const COLS`, `const ROWS` |
 | Points per food | `frontend/src/hooks/useGame.js` | `setScore((s) => s + 10)` |
-| Top scores count | `backend/src/routes/scores.js` | `.limit(10)` |
+| Top scores | `backend/src/routes/scores.js` | `.limit(10)` |
 | JWT expiry | `auth-service/src/routes/auth.js` | `expiresIn: '7d'` |
 | EKS node count | `infrastructure/terraform.tfvars` | `desired_size`, `max_size` |
 | EKS instance type | `infrastructure/terraform.tfvars` | `instance_type` |
 
-
+---
 
 ## 📄 License
 
