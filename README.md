@@ -2,7 +2,7 @@
 
 A fully functional Snake Game built as a production-ready **three-tier microservices application** with JWT authentication, a complete DevSecOps CI/CD pipeline, containerized with Docker, and deployed on AWS EKS using Terraform and Helm. Includes full observability with Prometheus and Grafana.
 
----
+
 
 ## 📐 Architecture
 
@@ -37,7 +37,7 @@ A fully functional Snake Game built as a production-ready **three-tier microserv
 Cluster: provisioned by Terraform — VPC, EKS, node groups, IAM, OIDC, ECR
 ```
 
----
+
 
 ## 🔄 CI/CD Pipeline
 
@@ -72,7 +72,7 @@ Build Docker Image → Trivy Scan (HTML report + gate) → Push to AWS ECR
 - `AmazonEKSWorkerNodePolicy`
 - Custom inline: `eks:DescribeCluster`, `eks:ListClusters`, `eks:AccessKubernetesApi`
 
----
+
 
 ## 🎮 What the App Does
 
@@ -85,7 +85,7 @@ Build Docker Image → Trivy Scan (HTML report + gate) → Push to AWS ECR
 - About page with project info, tech stack, and author details
 - Session persists on page refresh via sessionStorage
 
----
+
 
 ## 🗂️ Project Structure
 
@@ -183,7 +183,7 @@ three-tier-snake-game/
 └── z-documentation/
 ```
 
----
+
 
 ## ⚙️ Tech Stack
 
@@ -203,7 +203,7 @@ three-tier-snake-game/
 | Ingress | Nginx Ingress Controller |
 | Persistence | EBS gp2 PVC via StatefulSet (100Mi) |
 
----
+
 
 ## 📊 Observability
 
@@ -244,7 +244,7 @@ Apply custom dashboards and ServiceMonitors:
 kubectl apply -k k8s-manifest/
 ```
 
----
+
 
 ## ☁️ Infrastructure — Terraform
 
@@ -288,7 +288,7 @@ disk_size       = 30
 repositories    = ["frontend", "backend", "auth-service"]
 ```
 
----
+
 
 ## 🚀 Running Locally
 
@@ -332,7 +332,7 @@ kubectl apply -k k8s-manifest/
 http://snake-game.com
 ```
 
----
+
 
 ## ☸️ Kubernetes Deployment — EKS
 
@@ -381,7 +381,7 @@ kubectl port-forward svc/kube-prometheus-stack-grafana 3000:80 -n monitoring
 # http://localhost:3000 — admin / prom-operator
 ```
 
----
+
 
 ## 🎯 Helm Reference
 
@@ -404,7 +404,7 @@ helm rollback snake-game 1
 helm uninstall snake-game
 ```
 
----
+
 
 ## 📡 API Reference
 
@@ -427,7 +427,7 @@ helm uninstall snake-game
 | POST | `/auth/login` | No | Login — returns JWT |
 | GET | `/auth/verify` | JWT | Verify token |
 
----
+
 
 ## 🔐 JWT Auth Flow
 
@@ -443,7 +443,7 @@ Backend never calls Auth Service again after login.
 JWT_SECRET must be identical in both services — stored in mongo-sec Secret.
 ```
 
----
+
 
 ## 🗄️ Database
 
@@ -456,7 +456,7 @@ JWT_SECRET must be identical in both services — stored in mongo-sec Secret.
 | `scores` | score, username, userId, createdAt |
 | `users` | username, password (bcrypt 10 rounds), createdAt |
 
----
+
 
 ## 🔧 Kubernetes Resources
 
@@ -481,7 +481,7 @@ JWT_SECRET must be identical in both services — stored in mongo-sec Secret.
 | ServiceMonitor | `auth-monitor` | Prometheus scrape config |
 | ConfigMap | `grafana-dashboard` | Custom dashboard JSON |
 
----
+
 
 ## 🛡️ Security
 
@@ -499,7 +499,7 @@ JWT_SECRET must be identical in both services — stored in mongo-sec Secret.
 | IAM role on Jenkins EC2 | No hardcoded AWS keys |
 | ECR for image storage | No Docker Hub in production |
 
----
+
 
 ## 📊 Resource Limits
 
@@ -510,7 +510,7 @@ JWT_SECRET must be identical in both services — stored in mongo-sec Secret.
 | Auth Service | 250Mi | 250Mi | 300m | 500m |
 | MongoDB | 256Mi | 512Mi | 250m | 500m |
 
----
+
 
 ## 🔍 Health Checks
 
@@ -521,7 +521,7 @@ JWT_SECRET must be identical in both services — stored in mongo-sec Secret.
 | Auth Service | HTTP GET | `/health` port 4000 | 10s | 15s |
 | MongoDB | exec mongosh ping | — | 30s (5 retries) | 60s |
 
----
+
 
 ## 🛑 Useful Commands
 
@@ -559,7 +559,7 @@ kubectl delete namespace three-tier-dev
 cd infrastructure && terraform destroy
 ```
 
----
+
 
 ## 🔧 Common Modifications
 
@@ -575,7 +575,7 @@ cd infrastructure && terraform destroy
 | EKS node count | `infrastructure/terraform.tfvars` | `desired_size`, `max_size` |
 | EKS instance type | `infrastructure/terraform.tfvars` | `instance_type` |
 
----
+
 
 ## 📄 License
 
