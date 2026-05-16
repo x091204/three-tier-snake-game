@@ -8,29 +8,29 @@ A fully functional Snake Game built as a production-ready **three-tier microserv
 
 ```
                         ┌──────────────────────────────────────────────────┐
-                        │              AWS EKS Cluster                      │
-                        │              Namespace: three-tier-dev            │
-                        │                                                   │
+                        │              AWS EKS Cluster                     │
+                        │              Namespace: three-tier-dev           │
+                        │                                                  │
                         │   ┌─────────────────────────┐                    │
-  Browser               │   │      Ingress (Nginx)     │                   │
-  ──────────────────────┼──►│  snake-game.com          │                   │
-                        │   └──────┬──────┬────────────┘                   │
-                        │          │      │       │                         │
-                        │    /     │  /api│  /auth│                         │
-                        │    ▼        ▼       ▼                             │
+  Browser               │   │      Ingress (Nginx)    │                    │
+  ──────────────────────┼──►│  snake-game.com         │                    │
+                        │   └──────┬──────┬───────────┘                    │
+                        │          │      │       │                        │
+                        │    /     │  /api│  /auth│                        │
+                        │    ▼        ▼       ▼                            │
                         │  frontend  backend  auth-svc                     │
-                        │  :80       :5000    :4000                         │
-                        │                │        │                         │
+                        │  :80       :5000    :4000                        │
+                        │                │        │                        │
                         │           mongodb-svc (Headless)                 │
-                        │                │                                  │
+                        │                │                                 │
                         │           MongoDB (StatefulSet)                  │
-                        │                │                                  │
+                        │                │                                 │
                         │            PVC gp2 (100Mi)                       │
-                        │                                                   │
+                        │                                                  │
                         │   ┌─────────────────────────┐                    │
-                        │   │  Namespace: monitoring   │                    │
-                        │   │  Prometheus + Grafana    │                    │
-                        │   │  kube-prometheus-stack   │                    │
+                        │   │  Namespace: monitoring  │                    │
+                        │   │  Prometheus + Grafana   │                    │
+                        │   │  kube-prometheus-stack  │                    │
                         │   └─────────────────────────┘                    │
                         └──────────────────────────────────────────────────┘
 
