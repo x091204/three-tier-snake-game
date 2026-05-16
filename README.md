@@ -2,6 +2,7 @@
 
 A fully functional Snake Game built as a production-ready **three-tier microservices application** with JWT authentication, a complete DevSecOps CI/CD pipeline, containerized with Docker, and deployed on AWS EKS using Terraform and Helm. Includes full observability with Prometheus and Grafana.
 
+![Architecture Diagram](z-documentation/images/architecture.png)
 
 
 ## 📐 Architecture
@@ -36,7 +37,6 @@ A fully functional Snake Game built as a production-ready **three-tier microserv
 
 Cluster: provisioned by Terraform — VPC, EKS, node groups, IAM, OIDC, ECR
 ```
-
 
 
 ## 🔄 CI/CD Pipeline
