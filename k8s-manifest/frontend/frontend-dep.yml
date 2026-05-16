@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: frontend
-        image: akifmhd/frontend:1.0.5
+        image: 347751175563.dkr.ecr.ap-south-1.amazonaws.com/frontend:1.0.1
         ports:
         - containerPort: 80
         readinessProbe: 
